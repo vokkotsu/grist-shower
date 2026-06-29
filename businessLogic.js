@@ -30,28 +30,37 @@ const BusinessLogic = {
 
     generateSavePayload() {
         UIManager.saveCurrentInputsToState();
+
         const apiActions = [];
         const inputs = document.querySelectorAll('#table-body input');
 
         inputs.forEach(input => {
             const id = parseInt(input.dataset.id);
             const val = input.value.trim();
+
+            // Jika kosong dan belum ada di DB, lewati
             if (!id && val === '') return;
 
             const finalVal = isNaN(Number(val)) || val === '' ? val : Number(val);
             const dbDate = DateUtil.toGristString(input.dataset.date);
 
-            // Simpan ke destTable (Tes) menggunakan writeColMetric
+            // Payload untuk Grist
             if (id) {
-                apiActions.push(['UpdateRecord', Config.destTable, id, { [Config.colValue]: finalVal }]);
+                // Update record yang sudah ada
+                apiActions.push(['UpdateRecord', Config.writeTable, id, { [Config.writeCols.value]: finalVal }]);
             } else {
-                apiActions.push(['AddRecord', Config.destTable, null, {
-                    [Config.colDate]: dbDate,
-                    [Config.writeColMetric]: input.dataset.metric,
-                    [Config.colValue]: finalVal
+                // Tambah record baru
+                apiActions.push(['AddRecord', Config.writeTable, null, {
+                    [Config.writeCols.date]: dbDate,
+                    [Config.writeCols.metric]: input.dataset.metric,
+                    [Config.writeCols.value]: finalVal
                 }]);
             }
         });
+
+        // DEBUG: Lihat apa yang dikirim ke Grist
+        console.log("Mengirim payload ke Grist:", JSON.stringify(apiActions));
+
         return apiActions;
     }
 };
