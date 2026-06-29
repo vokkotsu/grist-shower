@@ -5,14 +5,13 @@ const BusinessLogic = {
             AppState.allRecords = [];
             AppState.uniqueDates = [];
             AppState.uniqueMetrics = [...Config.defaultMetrics];
-            UIManager.els.addMonthBtn.classList.remove('hidden');
             UIManager.showTable();
             UIManager.renderTable();
             return;
         }
 
         const sample = records[0];
-        if (!(Config.colDate in sample) || (!(Config.colMetric in sample)) || !(Config.colValue in sample)) {
+        if (!(Config.colDate in sample) || !(Config.colMetric in sample) || !(Config.colValue in sample)) {
             let cols = Object.keys(sample).filter(k => k !== 'id').join(', ');
             UIManager.showError(`<b>Error Kolom:</b> Cari: ${Config.colDate}, ${Config.colMetric}, ${Config.colValue}. <br>Tersedia: ${cols}`);
             return;
@@ -23,21 +22,16 @@ const BusinessLogic = {
 
         let janDateStr = incomingDates.find(d => String(d).toLowerCase().startsWith('jan'));
         if (janDateStr) {
-            UIManager.els.addMonthBtn.classList.add('hidden');
+            // Logika tombol dihapus karena otomatis di-generate
             const parts = janDateStr.split(' ');
             const year = parts.length >= 2 ? parts[1] : String(new Date().getFullYear()).slice(-2);
             const fullYear = DateUtil.monthNamesShort.map(m => m + ' ' + year);
             AppState.uniqueDates = [...new Set([...fullYear, ...incomingDates])];
         } else {
-            UIManager.els.addMonthBtn.classList.remove('hidden');
             AppState.uniqueDates = [...new Set([...AppState.uniqueDates, ...incomingDates])];
         }
 
-        // PENTING: Gunakan defaultMetrics (dari Table1) sebagai dasar urutan utama.
-        // Lalu tambahkan metrik lain yang mungkin terlanjur ada di database tapi tidak ada di Table1 (jika ada).
-        const existingDatabaseMetrics = records.map(r => r[Config.colMetric]).filter(Boolean);
-        AppState.uniqueMetrics = [...new Set([...Config.defaultMetrics, ...existingDatabaseMetrics])];
-
+        AppState.uniqueMetrics = [...new Set(records.map(r => r[Config.colMetric]))].filter(Boolean);
         UIManager.showTable();
         UIManager.renderTable();
     },
@@ -64,7 +58,6 @@ const BusinessLogic = {
         });
 
         AppState.uniqueDates = [...new Set([...AppState.uniqueDates, ...fullYearDates])];
-        UIManager.els.addMonthBtn.classList.add('hidden');
         UIManager.renderTable();
     },
 
