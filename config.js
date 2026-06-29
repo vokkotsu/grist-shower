@@ -1,14 +1,19 @@
 // config.js
 const Config = {
-    tableId: 'Table1', // Diubah dari 'Tes' ke 'Table1' agar sesuai dengan sumber data
+    // Tabel untuk membaca Master Metrik
+    sourceTable: 'Table1',
+    readColMetric: 'Metric', // Kolom di Table1
+
+    // Tabel untuk menyimpan data input
+    destTable: 'Tes',
+    writeColMetric: 'metrik', // Kolom di Tes
     colDate: 'Tanggal',
-    colMetric: 'Metric', // Diubah menjadi 'Metric' sesuai permintaan Anda
-    colValue: 'value',
-    defaultMetrics: ['Qty', 'Revenue from sales', 'COGS', 'Gross Profit'] // Sesuaikan dengan isi Metrics.csv Anda
+    colValue: 'value'
 };
 
 const AppState = {
-    allRecords: [],
+    allRecords: [], // Data dari tabel Tes
+    masterMetrics: [], // Data metrik dari Table1
     uniqueDates: [],
     uniqueMetrics: [],
     unsavedEdits: {}

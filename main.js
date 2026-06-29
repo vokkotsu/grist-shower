@@ -1,53 +1,34 @@
 // main.js
 document.addEventListener('DOMContentLoaded', () => {
     ThemeManager.init();
-
-    // Inisialisasi awal Grist
     grist.ready({ requiredAccess: 'full' });
 
-    const fetchMetricsFromTable1 = async () => {
+    // 1. Fetch Master Metrics dari Table1 (Background process)
+    const fetchMasterMetrics = async () => {
         try {
-            const table1Data = await grist.docApi.fetchTable('Table1');
-            if (table1Data && table1Data.Metric) {
-                const metrics = [];
-                for (let i = 0; i < table1Data.Metric.length; i++) {
-                    if (table1Data.Visibility && table1Data.Visibility[i] === 'Hidden') continue;
-                    metrics.push({
-                        name: table1Data.Metric[i],
-                        order: table1Data.Order ? Number(table1Data.Order[i]) : i
-                    });
-                }
-                metrics.sort((a, b) => a.order - b.order);
-                Config.defaultMetrics = metrics.map(m => m.name).filter(Boolean);
-                return true;
+            const data = await grist.docApi.fetchTable(Config.sourceTable);
+            if (data && data[Config.readColMetric]) {
+                AppState.masterMetrics = data[Config.readColMetric].filter(Boolean);
+                // Trigger render ulang jika tabel sudah ada isinya
+                if (AppState.allRecords.length > 0) BusinessLogic.processIncomingRecords(AppState.allRecords);
             }
-            return false;
-        } catch (err) {
-            console.error("Gagal membaca Table1.", err);
-            return false;
-        }
+        } catch (err) { console.error("Gagal fetch Table1", err); }
     };
+    fetchMasterMetrics();
 
-    UIManager.els.saveBtn.addEventListener('click', () => GristAPI.saveChanges());
-
-    const metricsPromise = fetchMetricsFromTable1();
-    let isYearInitialized = false;
-
-    grist.onRecords(async (records) => {
-        await metricsPromise;
+    // 2. Handle data dari tabel 'Tes'
+    let isInitialized = false;
+    grist.onRecords((records) => {
         AppState.allRecords = records;
 
-        const existingDatabaseMetrics = AppState.allRecords && AppState.allRecords.length > 0
-            ? AppState.allRecords.map(r => r[Config.colMetric]).filter(Boolean)
-            : [];
-        AppState.uniqueMetrics = [...new Set([...Config.defaultMetrics, ...existingDatabaseMetrics])];
-
-        if (!isYearInitialized) {
-            // Panggil fungsi tanpa perlu menyentuh UI tombol
+        // Jalankan addFullYear sekali saja saat startup
+        if (!isInitialized) {
             BusinessLogic.addFullYear();
-            isYearInitialized = true;
+            isInitialized = true;
         }
 
         BusinessLogic.processIncomingRecords(records);
     });
+
+    UIManager.els.saveBtn.addEventListener('click', () => GristAPI.saveChanges());
 });
