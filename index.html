@@ -163,7 +163,9 @@
             colMetric: 'metrik',
             colValue: 'value',
             refTableId: 'Table1', // Tabel referensi metrik terstandarisasi
-            refColMetric: 'Metrics' // Kolom yang berisi nama metrik
+            refColMetric: 'Metric', // Sesuai dengan header "Metric" di file CSV Anda
+            refColVisibility: 'Visibility', // Sesuai dengan header "Visibility" di file CSV Anda
+            refColOrder: 'Order' // Digunakan untuk mengurutkan baris metrik
         };
 
         // Fallback metrik jika tabel referensi kosong atau gagal dimuat
@@ -315,8 +317,29 @@
             try {
                 const refData = await grist.docApi.fetchTable(CONFIG.refTableId);
                 if (refData && refData[CONFIG.refColMetric]) {
-                    // Filter untuk menghilangkan baris yang metriknya kosong
-                    uniqueMetrics = [...new Set(refData[CONFIG.refColMetric])].filter(Boolean);
+                    const metricCol = refData[CONFIG.refColMetric];
+                    const visibilityCol = refData[CONFIG.refColVisibility];
+                    const orderCol = refData[CONFIG.refColOrder];
+
+                    let validMetrics = [];
+
+                    // Loop melalui setiap baris di tabel referensi
+                    for (let i = 0; i < metricCol.length; i++) {
+                        const metricName = metricCol[i];
+                        const visibility = visibilityCol && visibilityCol[i] ? String(visibilityCol[i]).trim().toLowerCase() : '';
+                        const order = orderCol && orderCol[i] ? Number(orderCol[i]) : 9999; // Default order jika kosong
+
+                        // Lewati jika metrik kosong atau memiliki visibility "hidden"
+                        if (metricName && visibility !== 'hidden') {
+                            validMetrics.push({ name: metricName, order: order });
+                        }
+                    }
+
+                    // Urutkan metrik berdasarkan kolom "Order" dari terkecil ke terbesar
+                    validMetrics.sort((a, b) => a.order - b.order);
+
+                    // Ambil hanya nama metriknya saja (sambil memastikan tidak ada duplikat)
+                    uniqueMetrics = [...new Set(validMetrics.map(m => m.name))];
                 } else {
                     uniqueMetrics = [...DEFAULT_METRICS_FOR_EMPTY_TABLE];
                 }
