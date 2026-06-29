@@ -3,7 +3,7 @@ const CONFIG = {
     colDate: 'Tanggal',
     colMetric: 'metrik',
     colValue: 'value',
-    refTableId: 'Table1',
+    refTableId: 'Metrics',
     refColMetric: 'Metric',
     refColVisibility: 'Visibility',
     refColOrder: 'Order'
