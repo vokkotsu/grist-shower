@@ -2,9 +2,13 @@
 document.addEventListener('DOMContentLoaded', () => {
     ThemeManager.init();
 
+    // Inisialisasi awal Grist
+    grist.ready({ requiredAccess: 'full' });
+
     // Fungsi untuk menarik metrik dari Table1
     const fetchMetricsFromTable1 = async () => {
         try {
+            // Kita gunakan fetchTable, pastikan nama tabel benar: 'Table1'
             const table1Data = await grist.docApi.fetchTable('Table1');
 
             if (table1Data && table1Data.Metric) {
@@ -20,29 +24,32 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 metrics.sort((a, b) => a.order - b.order);
                 Config.defaultMetrics = metrics.map(m => m.name).filter(Boolean);
+                return true; // Berhasil
             }
+            return false; // Tabel kosong
         } catch (err) {
-            console.warn("Gagal membaca Table1.", err);
+            console.error("Gagal membaca Table1. Periksa apakah nama tabel benar-benar 'Table1'.", err);
+            return false;
         }
     };
 
     UIManager.els.saveBtn.addEventListener('click', () => GristAPI.saveChanges());
 
-    // Inisialisasi data Table1 secara asinkron di latar belakang
-    // Tanpa 'await' di sini agar tidak menghambat aliran data utama
+    // Inisialisasi promise lebih awal
     const metricsPromise = fetchMetricsFromTable1();
 
     let isYearInitialized = false;
 
     grist.onRecords(async (records) => {
-        // Tunggu metrik selesai ditarik jika belum (tanpa memblokir UI terlalu lama)
+        // Tunggu metrik selesai ditarik
         await metricsPromise;
 
-        // Simpan records ke state
         AppState.allRecords = records;
 
-        // Update uniqueMetrics dengan metrik yang baru saja didapat
-        const existingDatabaseMetrics = AppState.allRecords && AppState.allRecords.length > 0 ? AppState.allRecords.map(r => r[Config.colMetric]).filter(Boolean) : [];
+        // Update uniqueMetrics
+        const existingDatabaseMetrics = AppState.allRecords && AppState.allRecords.length > 0
+            ? AppState.allRecords.map(r => r[Config.colMetric]).filter(Boolean)
+            : [];
         AppState.uniqueMetrics = [...new Set([...Config.defaultMetrics, ...existingDatabaseMetrics])];
 
         // Pemicu otomatis untuk menambah periode (bulan) HANYA SEKALI
@@ -53,6 +60,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
         BusinessLogic.processIncomingRecords(records);
     });
-
-    grist.ready({ requiredAccess: 'full' });
 });
