@@ -1,10 +1,10 @@
 // config.js
 const Config = {
-    tableId: 'Tes',
+    tableId: 'Table1', // Diubah dari 'Tes' ke 'Table1' agar sesuai dengan sumber data
     colDate: 'Tanggal',
-    colMetric: 'metrik',
+    colMetric: 'Metric', // Diubah menjadi 'Metric' sesuai permintaan Anda
     colValue: 'value',
-    defaultMetrics: ['qty', 'revenue', 'cogs']
+    defaultMetrics: ['Qty', 'Revenue from sales', 'COGS', 'Gross Profit'] // Sesuaikan dengan isi Metrics.csv Anda
 };
 
 const AppState = {
