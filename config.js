@@ -1,5 +1,5 @@
 const CONFIG = {
-    tableId: 'Tes',
+    tableId: 'Data_Outlook',
     colDate: 'Tanggal',
     colMetric: 'metrik',
     colValue: 'value',
