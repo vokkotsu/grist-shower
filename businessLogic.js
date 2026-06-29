@@ -35,32 +35,43 @@ const BusinessLogic = {
         const inputs = document.querySelectorAll('#table-body input');
 
         inputs.forEach(input => {
-            const id = parseInt(input.dataset.id);
+            const id = input.dataset.id ? parseInt(input.dataset.id) : null;
             const val = input.value.trim();
+            const metric = input.dataset.metric;
+            const date = input.dataset.date;
 
-            // Jika kosong dan belum ada di DB, lewati
-            if (!id && val === '') return;
+            // Konversi nilai
+            const finalVal = (val === '' || isNaN(Number(val))) ? val : Number(val);
+            const dbDate = DateUtil.toGristString(date);
 
-            const finalVal = isNaN(Number(val)) || val === '' ? val : Number(val);
-            const dbDate = DateUtil.toGristString(input.dataset.date);
+            // LOGIKA PENCARIAN ID YANG LEBIH TEPAT
+            // Cari apakah record ini sudah ada di AppState berdasarkan Metric & Tanggal
+            let existingRecord = AppState.allRecords.find(r =>
+                r[Config.colMetric] === metric &&
+                DateUtil.parse(r[Config.colDate]) === date
+            );
+
+            // Jika id di input kosong, coba ambil dari existingRecord
+            const recordId = id || (existingRecord ? existingRecord.id : null);
 
             // Payload untuk Grist
-            if (id) {
-                // Update record yang sudah ada
-                apiActions.push(['UpdateRecord', Config.writeTable, id, { [Config.writeCols.value]: finalVal }]);
-            } else {
-                // Tambah record baru
-                apiActions.push(['AddRecord', Config.writeTable, null, {
-                    [Config.writeCols.date]: dbDate,
-                    [Config.writeCols.metric]: input.dataset.metric,
-                    [Config.writeCols.value]: finalVal
+            if (recordId) {
+                // UPDATE: Hanya jika ada perubahan nilai
+                const originalVal = existingRecord ? existingRecord[Config.colValue] : null;
+                if (String(originalVal) !== String(finalVal)) {
+                    apiActions.push(['UpdateRecord', 'Tes', recordId, { [Config.colValue]: finalVal }]);
+                }
+            } else if (val !== '') {
+                // ADD: Hanya jika ada isi dan belum ada recordnya
+                apiActions.push(['AddRecord', 'Tes', null, {
+                    [Config.colDate]: dbDate,
+                    [Config.colMetric]: metric,
+                    [Config.colValue]: finalVal
                 }]);
             }
         });
 
-        // DEBUG: Lihat apa yang dikirim ke Grist
-        console.log("Mengirim payload ke Grist:", JSON.stringify(apiActions));
-
+        console.log("Payload yang dikirim:", apiActions);
         return apiActions;
     }
 };
