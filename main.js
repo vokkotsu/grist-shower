@@ -1,5 +1,5 @@
 // main.js
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
     ThemeManager.init();
 
     // Ekstrak fungsi penarikan data agar bisa digunakan saat loading awal
@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 Config.defaultMetrics = metrics.map(m => m.name).filter(Boolean);
 
                 // Perbarui uniqueMetrics di AppState
-                const existingDatabaseMetrics = AppState.allRecords ? AppState.allRecords.map(r => r[Config.colMetric]).filter(Boolean) : [];
+                const existingDatabaseMetrics = AppState.allRecords && AppState.allRecords.length > 0 ? AppState.allRecords.map(r => r[Config.colMetric]).filter(Boolean) : [];
                 AppState.uniqueMetrics = [...new Set([...Config.defaultMetrics, ...existingDatabaseMetrics])];
             }
         } catch (err) {
@@ -45,12 +45,21 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     UIManager.els.saveBtn.addEventListener('click', () => GristAPI.saveChanges());
 
-    // 1. Inisialisasi Akses Grist API
+    // VARIABEL PENANDA: Agar data Table1 tidak di-download berkali-kali setiap ada perubahan sel
+    let isMetricsLoaded = false;
+
+    // 1. Pasang Listener untuk tabel utama TERLEBIH DAHULU (Sangat penting agar tidak miss data!)
+    grist.onRecords(async (records) => {
+        // Jika Table1 belum pernah diunduh, unduh dulu sekarang (hanya 1x di awal)
+        if (!isMetricsLoaded) {
+            await fetchMetricsFromTable1();
+            isMetricsLoaded = true;
+        }
+
+        // Setelah metrik dari Table1 siap, baru lanjutkan memproses data utama dan memunculkan tabel
+        BusinessLogic.processIncomingRecords(records);
+    });
+
+    // 2. Inisialisasi Akses Grist API (Memberi tahu Grist bahwa widget sudah siap)
     grist.ready({ requiredAccess: 'full' });
-
-    // 2. Ambil Metrik Predefined dari 'Table1' SEKALI SAJA saat halaman pertama kali dibuka
-    await fetchMetricsFromTable1();
-
-    // 3. Pasang Listener untuk tabel utama (Tes)
-    grist.onRecords(records => BusinessLogic.processIncomingRecords(records));
 });
