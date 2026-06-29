@@ -32,15 +32,22 @@ document.addEventListener('DOMContentLoaded', () => {
     UIManager.els.saveBtn.addEventListener('click', () => GristAPI.saveChanges());
 
     let isMetricsLoaded = false;
+    let isYearInitialized = false; // Penanda tambahan untuk mencegah loop
 
     grist.onRecords(async (records) => {
+        // Jika data baru pertama kali masuk
         if (!isMetricsLoaded) {
             await fetchMetricsFromTable1();
             isMetricsLoaded = true;
+        }
 
-            // Pemicu otomatis untuk menambah periode (bulan) saat pertama kali data dimuat
-            // Ini menggantikan tombol tambah bulan
+        // Simpan records ke state agar bisa diakses logic
+        AppState.allRecords = records;
+
+        // Pemicu otomatis untuk menambah periode (bulan) HANYA SEKALI
+        if (!isYearInitialized) {
             BusinessLogic.addFullYear();
+            isYearInitialized = true;
         }
 
         BusinessLogic.processIncomingRecords(records);
