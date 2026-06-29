@@ -12,7 +12,7 @@ const BusinessLogic = {
         }
 
         const sample = records[0];
-        if (!(Config.colDate in sample) || !(Config.colMetric in sample) || !(Config.colValue in sample)) {
+        if (!(Config.colDate in sample) || (!(Config.colMetric in sample)) || !(Config.colValue in sample)) {
             let cols = Object.keys(sample).filter(k => k !== 'id').join(', ');
             UIManager.showError(`<b>Error Kolom:</b> Cari: ${Config.colDate}, ${Config.colMetric}, ${Config.colValue}. <br>Tersedia: ${cols}`);
             return;
@@ -33,7 +33,11 @@ const BusinessLogic = {
             AppState.uniqueDates = [...new Set([...AppState.uniqueDates, ...incomingDates])];
         }
 
-        AppState.uniqueMetrics = [...new Set(records.map(r => r[Config.colMetric]))].filter(Boolean);
+        // PENTING: Gunakan defaultMetrics (dari Table1) sebagai dasar urutan utama.
+        // Lalu tambahkan metrik lain yang mungkin terlanjur ada di database tapi tidak ada di Table1 (jika ada).
+        const existingDatabaseMetrics = records.map(r => r[Config.colMetric]).filter(Boolean);
+        AppState.uniqueMetrics = [...new Set([...Config.defaultMetrics, ...existingDatabaseMetrics])];
+
         UIManager.showTable();
         UIManager.renderTable();
     },
