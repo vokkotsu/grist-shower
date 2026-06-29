@@ -32,12 +32,10 @@
         }
     </script>
     <style>
-        /* Menggunakan stack font standar Grist */
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Liberation Sans", Helvetica, Arial, sans-serif;
         }
 
-        /* Styling scrollbar minimalis ala Grist */
         ::-webkit-scrollbar {
             height: 10px;
             width: 10px;
@@ -74,7 +72,6 @@
             background: #66667a;
         }
 
-        /* Menghilangkan panah atas/bawah pada input number (walau kita pakai text) */
         input[type=number]::-webkit-inner-spin-button,
         input[type=number]::-webkit-outer-spin-button {
             -webkit-appearance: none;
@@ -85,11 +82,8 @@
 
 <body
     class="bg-white dark:bg-gristDarkBg m-0 p-0 h-screen flex flex-col text-[#262633] dark:text-gristDarkText transition-colors duration-200">
-
-    <!-- Container Utama -->
     <div class="w-full bg-white dark:bg-gristDarkBg flex flex-col h-full transition-colors duration-200">
-
-        <!-- Top Bar bergaya Grist -->
+        <!-- Top Bar -->
         <div
             class="border-b border-[#d9d9d9] dark:border-gristDarkBorder py-2.5 px-4 flex justify-between items-center bg-white dark:bg-gristDarkBg z-10 flex-wrap gap-4 transition-colors duration-200">
             <div>
@@ -97,30 +91,27 @@
                 <p class="text-[11px] text-[#929299] dark:text-gristDarkMuted mt-0.5">Edit nilai pada sel, widget akan
                     otomatis memetakan kembali ke tabel database Anda.</p>
             </div>
-
             <div class="flex gap-2 items-center">
                 <button type="button" id="theme-toggle"
                     class="text-[#929299] dark:text-gristDarkMuted hover:bg-[#f7f7f7] dark:hover:bg-gristDarkPanel hover:text-[#262633] dark:hover:text-gristDarkText p-1.5 rounded transition duration-150 mr-2"
                     title="Ganti Tema">
-                    <!-- Icon Matahari (Muncul saat Dark Mode aktif, untuk beralih ke Light) -->
+                    <!-- Icon Light -->
                     <svg id="theme-toggle-light-icon" class="hidden w-4 h-4" fill="currentColor" viewBox="0 0 20 20"
-                        xmlns="http://www.w3.org/2000/svg">
+                        xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)">
                         <path
                             d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"
                             fill-rule="evenodd" clip-rule="evenodd"></path>
                     </svg>
-                    <!-- Icon Bulan (Muncul saat Light Mode aktif, untuk beralih ke Dark) -->
+                    <!-- Icon Dark -->
                     <svg id="theme-toggle-dark-icon" class="hidden w-4 h-4" fill="currentColor" viewBox="0 0 20 20"
-                        xmlns="http://www.w3.org/2000/svg">
+                        xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)">
                         <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
                     </svg>
                 </button>
-
-                <!-- Tombol Simpan (Primary Button Grist - Hijau Khas) -->
                 <button type="button" id="save-btn"
                     class="bg-[#16b378] hover:bg-[#139a67] text-white font-medium py-1.5 px-3 rounded text-[13px] transition duration-150 flex items-center gap-1.5 shadow-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
+                    <svg xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)" class="h-4 w-4" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                     </svg>
                     Simpan Perubahan
@@ -136,393 +127,24 @@
             </div>
         </div>
 
-        <!-- Tabel Data Grid Transpose -->
+        <!-- Tabel Data Grid -->
         <div id="table-container"
             class="hidden flex-grow overflow-auto p-0 relative bg-[#f7f7f7] dark:bg-[#1e1e24] transition-colors duration-200">
             <table
                 class="w-full border-collapse text-sm whitespace-nowrap bg-white dark:bg-gristDarkBg transition-colors duration-200">
                 <thead class="sticky top-0 z-20">
-                    <tr id="table-head">
-                        <!-- Header akan di-generate (Tanggal) -->
-                    </tr>
+                    <tr id="table-head"></tr>
                 </thead>
-                <tbody id="table-body">
-                    <!-- Baris data akan di-generate (Metrik x Tanggal) -->
-                </tbody>
+                <tbody id="table-body"></tbody>
             </table>
         </div>
     </div>
 
-    <script>
-        // =====================================================================
-        // KONFIGURASI KOLOM GRIST
-        // =====================================================================
-        const CONFIG = {
-            tableId: 'Tes', // Hardcoded ke tabel 'Tes'
-            colDate: 'Tanggal',
-            colMetric: 'metrik',
-            colValue: 'value',
-            refTableId: 'Table1', // Tabel referensi metrik terstandarisasi
-            refColMetric: 'Metric', // Sesuai dengan header "Metric" di file CSV Anda
-            refColVisibility: 'Visibility', // Sesuai dengan header "Visibility" di file CSV Anda
-            refColOrder: 'Order' // Digunakan untuk mengurutkan baris metrik
-        };
-
-        // Fallback metrik jika tabel referensi kosong atau gagal dimuat
-        const DEFAULT_METRICS_FOR_EMPTY_TABLE = ['qty', 'revenue', 'cogs'];
-
-        let allRecords = [];
-        let uniqueDates = [];
-        let uniqueMetrics = [];
-        let unsavedEdits = {};
-
-        // Inisialisasi Grist (Akses Penuh)
-        grist.ready({ requiredAccess: 'full' });
-
-        // ==========================================
-        // HELPER UNTUK KONVERSI TANGGAL
-        // ==========================================
-        const monthNamesShort = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
-
-        function parseGristDate(val) {
-            if (val === null || val === undefined || val === '') return '';
-            try {
-                if (val instanceof Date) {
-                    return monthNamesShort[val.getUTCMonth()] + ' ' + String(val.getUTCFullYear()).slice(-2);
-                }
-                if (typeof val === 'string') {
-                    if (monthNamesShort.some(m => val.startsWith(m))) return val;
-                    const match = val.match(/^(\d{4})-(\d{2})-\d{2}/);
-                    if (match) {
-                        let y = match[1].slice(-2);
-                        let m = parseInt(match[2], 10) - 1;
-                        if (m >= 0 && m <= 11) {
-                            return monthNamesShort[m] + ' ' + y;
-                        }
-                    }
-                    let d = new Date(val);
-                    if (!isNaN(d.getTime())) {
-                        return monthNamesShort[d.getUTCMonth()] + ' ' + String(d.getUTCFullYear()).slice(-2);
-                    }
-                }
-                if (typeof val === 'number') {
-                    let d = new Date(val > 100000000000 ? val : val * 1000);
-                    return monthNamesShort[d.getUTCMonth()] + ' ' + String(d.getUTCFullYear()).slice(-2);
-                }
-                if (Array.isArray(val) && val.length >= 2 && typeof val[1] === 'number') {
-                    let d = new Date(val[1] * 1000);
-                    return monthNamesShort[d.getUTCMonth()] + ' ' + String(d.getUTCFullYear()).slice(-2);
-                }
-            } catch (e) {
-                console.error("Gagal parsing tanggal:", e);
-            }
-            return String(val);
-        }
-
-        function toGristDateString(formattedDateStr) {
-            let parts = formattedDateStr.split(' ');
-            if (parts.length >= 2) {
-                let mIndex = monthNamesShort.indexOf(parts[0]);
-                if (mIndex !== -1) {
-                    let y = parts[parts.length - 1];
-                    if (y.length === 2) y = "20" + y; // Asumsi tahun 2000-an
-                    let m = String(mIndex + 1).padStart(2, '0');
-                    return `${y}-${m}-01`;
-                }
-            }
-            return formattedDateStr;
-        }
-
-        // ==========================================
-        // RENDER & LOGIKA DATA GRIST
-        // ==========================================
-        function renderTable() {
-            const theadRow = document.getElementById('table-head');
-            const tbody = document.getElementById('table-body');
-            theadRow.innerHTML = '';
-            tbody.innerHTML = '';
-
-            let thFirst = document.createElement('th');
-            thFirst.className = "bg-[#f7f7f7] dark:bg-gristDarkPanel text-[#929299] dark:text-gristDarkMuted text-[11px] uppercase tracking-wider font-semibold border border-[#d9d9d9] dark:border-gristDarkBorder p-2 text-left min-w-[200px] z-30 sticky left-0 transition-colors duration-200";
-            thFirst.innerText = "IS in thousand USD";
-            theadRow.appendChild(thFirst);
-
-            // Header Tanggal (Kolom) - Selalu menampilkan 12 Bulan
-            uniqueDates.forEach(date => {
-                let th = document.createElement('th');
-                th.className = "bg-[#f7f7f7] dark:bg-gristDarkPanel text-[#929299] dark:text-gristDarkMuted text-[11px] uppercase tracking-wider font-semibold border border-[#d9d9d9] dark:border-gristDarkBorder p-2 text-center min-w-[120px] transition-colors duration-200";
-                th.innerText = date;
-                theadRow.appendChild(th);
-            });
-
-            uniqueMetrics.forEach(metric => {
-                let tr = document.createElement('tr');
-
-                // Sel Nama Metrik (Baris Kiri)
-                let tdMetric = document.createElement('td');
-                tdMetric.className = "bg-[#f7f7f7] dark:bg-gristDarkPanel text-[#262633] dark:text-gristDarkText text-[13px] font-medium border border-[#d9d9d9] dark:border-gristDarkBorder p-2 sticky left-0 z-10 capitalize transition-colors duration-200";
-                tdMetric.innerText = metric;
-                tr.appendChild(tdMetric);
-
-                uniqueDates.forEach(date => {
-                    let td = document.createElement('td');
-                    td.className = "p-0 relative h-full border border-[#d9d9d9] dark:border-gristDarkBorder bg-white dark:bg-gristDarkBg transition-colors duration-200";
-
-                    let matchedRecord = allRecords.find(r => r[CONFIG.colMetric] === metric && parseGristDate(r[CONFIG.colDate]) === date);
-                    let val = matchedRecord && matchedRecord[CONFIG.colValue] !== null ? matchedRecord[CONFIG.colValue] : '';
-                    let recordId = matchedRecord ? matchedRecord.id : '';
-
-                    const editKey = `${metric}|${date}`;
-                    if (unsavedEdits[editKey] !== undefined) {
-                        val = unsavedEdits[editKey];
-                    }
-
-                    let input = document.createElement('input');
-                    input.type = 'text';
-                    input.className = "w-full h-full min-h-[32px] px-2 absolute inset-0 font-mono text-right text-[13px] text-[#262633] dark:text-gristDarkText bg-transparent focus:outline-none focus:ring-0 focus:shadow-[inset_0_0_0_2px_#1f78d1] focus:bg-blue-50/30 dark:focus:bg-[#1f78d1]/20 focus:z-20 transition-none";
-                    input.value = val;
-
-                    input.dataset.id = recordId;
-                    input.dataset.date = date;
-                    input.dataset.metric = metric;
-
-                    // Simpan nilai sementara ke unsavedEdits ketika user mengetik
-                    // Mencegah nilai hilang jika Grist auto-refresh sebelum user klik Simpan
-                    input.addEventListener('input', (e) => {
-                        unsavedEdits[`${metric}|${date}`] = e.target.value;
-                    });
-
-                    td.appendChild(input);
-                    tr.appendChild(td);
-                });
-                tbody.appendChild(tr);
-            });
-        }
-
-        // ==========================================
-        // MENDENGARKAN PERUBAHAN DARI GRIST
-        // ==========================================
-        grist.onRecords(async function (records) {
-            const loadingDiv = document.getElementById('loading');
-            const errorBox = document.getElementById('error-box');
-            const tableContainer = document.getElementById('table-container');
-
-            loadingDiv.classList.remove('hidden');
-            tableContainer.classList.add('hidden');
-            errorBox.classList.add('hidden');
-
-            let yearToUse = String(new Date().getFullYear()).slice(-2);
-
-            // 1. Ambil list metrik terstandarisasi dari Table1 melalui Grist Doc API
-            try {
-                const refData = await grist.docApi.fetchTable(CONFIG.refTableId);
-                if (refData && refData[CONFIG.refColMetric]) {
-                    const metricCol = refData[CONFIG.refColMetric];
-                    const visibilityCol = refData[CONFIG.refColVisibility];
-                    const orderCol = refData[CONFIG.refColOrder];
-
-                    let validMetrics = [];
-
-                    // Loop melalui setiap baris di tabel referensi
-                    for (let i = 0; i < metricCol.length; i++) {
-                        const metricName = metricCol[i];
-                        const visibility = visibilityCol && visibilityCol[i] ? String(visibilityCol[i]).trim().toLowerCase() : '';
-                        const order = orderCol && orderCol[i] ? Number(orderCol[i]) : 9999; // Default order jika kosong
-
-                        // Lewati jika metrik kosong atau memiliki visibility "hidden"
-                        if (metricName && visibility !== 'hidden') {
-                            validMetrics.push({ name: metricName, order: order });
-                        }
-                    }
-
-                    // Urutkan metrik berdasarkan kolom "Order" dari terkecil ke terbesar
-                    validMetrics.sort((a, b) => a.order - b.order);
-
-                    // Ambil hanya nama metriknya saja (sambil memastikan tidak ada duplikat)
-                    uniqueMetrics = [...new Set(validMetrics.map(m => m.name))];
-                } else {
-                    uniqueMetrics = [...DEFAULT_METRICS_FOR_EMPTY_TABLE];
-                }
-            } catch (error) {
-                console.error(`Gagal mengambil metrik dari tabel ${CONFIG.refTableId}:`, error);
-                if (uniqueMetrics.length === 0) {
-                    uniqueMetrics = [...DEFAULT_METRICS_FOR_EMPTY_TABLE];
-                }
-            }
-
-            // Jika tabel kosong
-            if (!records || records.length === 0) {
-                allRecords = [];
-                // Pastikan selalu ada 12 bulan
-                uniqueDates = monthNamesShort.map(m => m + ' ' + yearToUse);
-
-                loadingDiv.classList.add('hidden');
-                tableContainer.classList.remove('hidden');
-
-                renderTable();
-                return;
-            }
-
-            const sampleRecord = records[0];
-            if (!(CONFIG.colDate in sampleRecord) || !(CONFIG.colMetric in sampleRecord) || !(CONFIG.colValue in sampleRecord)) {
-                errorBox.innerHTML = `<b>Error Konfigurasi Kolom:</b><br>
-                Widget mencari kolom <code>${CONFIG.colDate}</code>, <code>${CONFIG.colMetric}</code>, dan <code>${CONFIG.colValue}</code>, tetapi tidak menemukannya di tabel Grist Anda.<br><br>
-                <b>Kolom yang tersedia:</b> ${Object.keys(sampleRecord).filter(k => k !== 'id').join(', ')}`;
-                errorBox.classList.remove('hidden');
-                loadingDiv.classList.add('hidden');
-                return;
-            }
-
-            allRecords = records;
-
-            // Ekstrak Tanggal & Lakukan Parse
-            const incomingDates = [...new Set(records.map(r => parseGristDate(r[CONFIG.colDate])))].filter(Boolean);
-
-            if (incomingDates.length > 0) {
-                // Ambil tahun dari tanggal pertama yang ada di database
-                const parts = incomingDates[0].split(' ');
-                if (parts.length >= 2) yearToUse = parts[1];
-            }
-
-            // Memaksa uniqueDates berisi 12 bulan sesuai tahun berjalan (atau dari data)
-            uniqueDates = monthNamesShort.map(m => m + ' ' + yearToUse);
-
-            loadingDiv.classList.add('hidden');
-            tableContainer.classList.remove('hidden');
-            renderTable();
-        });
-
-
-        // ==========================================
-        // PROSES SIMPAN
-        // ==========================================
-        document.getElementById('save-btn').addEventListener('click', async () => {
-            const saveBtn = document.getElementById('save-btn');
-            const originalContent = saveBtn.innerHTML;
-
-            saveBtn.innerHTML = `
-                <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg> Menyimpan...`;
-            saveBtn.disabled = true;
-            saveBtn.className = "bg-gray-400 text-white font-medium py-1.5 px-3 rounded text-[13px] flex items-center shadow-sm cursor-not-allowed";
-
-            let emptyRecords = allRecords.filter(r =>
-                (!r[CONFIG.colDate] || parseGristDate(r[CONFIG.colDate]) === '') &&
-                (!r[CONFIG.colMetric] || String(r[CONFIG.colMetric]).trim() === '') &&
-                (r[CONFIG.colValue] === null || String(r[CONFIG.colValue]).trim() === '')
-            );
-            emptyRecords.sort((a, b) => a.id - b.id);
-
-            const inputs = document.querySelectorAll('#table-body input');
-            const apiActions = [];
-
-            inputs.forEach(input => {
-                const id = parseInt(input.dataset.id);
-                const uiDate = input.dataset.date;
-                const metric = input.dataset.metric;
-                let val = input.value.trim();
-
-                // Abaikan jika tidak ada ID (berarti record baru) dan valuenya kosong
-                if (!id && val === '') return;
-
-                const numericVal = Number(val);
-                const finalVal = isNaN(numericVal) || val === '' ? val : numericVal;
-
-                const gristDateStr = toGristDateString(uiDate);
-
-                if (id) {
-                    const originalRecord = allRecords.find(r => r.id === id);
-                    if (originalRecord && String(originalRecord[CONFIG.colValue]) !== String(val)) {
-                        apiActions.push(['UpdateRecord', CONFIG.tableId, id, {
-                            [CONFIG.colValue]: finalVal
-                        }]);
-                    }
-                } else {
-                    if (emptyRecords.length > 0) {
-                        const recycledRow = emptyRecords.shift();
-                        apiActions.push(['UpdateRecord', CONFIG.tableId, recycledRow.id, {
-                            [CONFIG.colDate]: gristDateStr,
-                            [CONFIG.colMetric]: metric,
-                            [CONFIG.colValue]: finalVal
-                        }]);
-                    } else {
-                        apiActions.push(['AddRecord', CONFIG.tableId, null, {
-                            [CONFIG.colDate]: gristDateStr,
-                            [CONFIG.colMetric]: metric,
-                            [CONFIG.colValue]: finalVal
-                        }]);
-                    }
-                }
-            });
-
-            if (apiActions.length === 0) {
-                saveBtn.innerHTML = 'Tidak ada perubahan';
-                saveBtn.className = "bg-yellow-500 text-white font-medium py-1.5 px-3 rounded text-[13px] flex items-center shadow-sm";
-                setTimeout(() => resetBtn(saveBtn, originalContent), 2000);
-                return;
-            }
-
-            try {
-                // Terapkan perubahan ke database Grist
-                await grist.docApi.applyUserActions(apiActions);
-                unsavedEdits = {}; // Bersihkan cache ketikan jika sudah sukses tersimpan
-
-                saveBtn.innerHTML = `
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                    </svg>
-                    Tersimpan`;
-                saveBtn.className = "bg-[#16b378] text-white font-medium py-1.5 px-3 rounded text-[13px] flex items-center gap-1.5 shadow-sm";
-
-            } catch (error) {
-                console.error("Gagal menyimpan:", error);
-                saveBtn.innerHTML = 'Gagal Disimpan';
-                saveBtn.className = "bg-red-600 text-white font-medium py-1.5 px-3 rounded text-[13px] flex items-center shadow-sm";
-                let errorMsg = error.message;
-                alert("Kesalahan API saat menyimpan: " + errorMsg);
-            } finally {
-                setTimeout(() => resetBtn(saveBtn, originalContent), 2000);
-            }
-        });
-
-        function resetBtn(btn, content) {
-            btn.innerHTML = content;
-            btn.disabled = false;
-            btn.className = "bg-[#16b378] hover:bg-[#139a67] text-white font-medium py-1.5 px-3 rounded text-[13px] transition duration-150 flex items-center gap-1.5 shadow-sm";
-        }
-
-        // ==========================================
-        // LOGIKA DARK MODE TOGGLE
-        // ==========================================
-        const themeToggleBtn = document.getElementById('theme-toggle');
-        const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
-        const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
-
-        // Tampilkan ikon yang benar saat widget dimuat
-        if (document.documentElement.classList.contains('dark')) {
-            themeToggleLightIcon.classList.remove('hidden');
-        } else {
-            themeToggleDarkIcon.classList.remove('hidden');
-        }
-
-        themeToggleBtn.addEventListener('click', function () {
-            // Tukar ikon
-            themeToggleDarkIcon.classList.toggle('hidden');
-            themeToggleLightIcon.classList.toggle('hidden');
-
-            // Ganti tema HTML dan simpan di memori browser
-            if (document.documentElement.classList.contains('dark')) {
-                document.documentElement.classList.remove('dark');
-                localStorage.setItem('color-theme', 'light');
-            } else {
-                document.documentElement.classList.add('dark');
-                localStorage.setItem('color-theme', 'dark');
-            }
-        });
-
-    </script>
+    <!-- Panggil File JS Modular (Urutan Penting!) -->
+    <script src="config.js"></script>
+    <script src="utils.js"></script>
+    <script src="ui.js"></script>
+    <script src="api.js"></script>
 </body>
 
 </html>
