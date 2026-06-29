@@ -1,15 +1,12 @@
 // businessLogic.js
 const BusinessLogic = {
     processIncomingRecords(records) {
+        if (!records) records = [];
+
+        // Simpan data mentah dari tabel "Tes"
         AppState.allRecords = records;
 
-        // Gabungkan tanggal dari data yang ada
-        const incomingDates = [...new Set(records.map(r => DateUtil.parse(r[Config.colDate])))].filter(Boolean);
-        AppState.uniqueDates = [...new Set([...AppState.uniqueDates, ...incomingDates])];
-
-        // Gunakan masterMetrics (yang di-fetch dari Table1) sebagai acuan baris
-        AppState.uniqueMetrics = [...AppState.masterMetrics];
-
+        // Render tabel
         UIManager.showTable();
         UIManager.renderTable();
     },

@@ -80,7 +80,10 @@ const UIManager = {
                 let td = document.createElement('td');
                 td.className = "p-0 relative h-full border border-[#d9d9d9] dark:border-gristDarkBorder bg-white dark:bg-gristDarkBg transition-colors duration-200";
 
-                let matched = AppState.allRecords.find(r => r[Config.colMetric] === metric && DateUtil.parse(r[Config.colDate]) === date);
+                let matched = AppState.allRecords.find(r =>
+                    String(r[Config.colMetric]).trim() === String(metric).trim() &&
+                    DateUtil.parse(r[Config.colDate]) === date
+                );
                 let val = matched && matched[Config.colValue] !== null ? matched[Config.colValue] : '';
                 let recordId = matched ? matched.id : '';
 
