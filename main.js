@@ -2,7 +2,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     ThemeManager.init();
 
-    // Ekstrak fungsi penarikan data agar bisa digunakan berulang kali
+    // Ekstrak fungsi penarikan data agar bisa digunakan saat loading awal
     const fetchMetricsFromTable1 = async () => {
         try {
             const table1Data = await grist.docApi.fetchTable('Table1');
@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 // Timpa defaultMetrics dengan data dari Table1
                 Config.defaultMetrics = metrics.map(m => m.name).filter(Boolean);
 
-                // Perbarui uniqueMetrics di AppState agar sel baru langsung terbentuk
+                // Perbarui uniqueMetrics di AppState
                 const existingDatabaseMetrics = AppState.allRecords ? AppState.allRecords.map(r => r[Config.colMetric]).filter(Boolean) : [];
                 AppState.uniqueMetrics = [...new Set([...Config.defaultMetrics, ...existingDatabaseMetrics])];
             }
@@ -37,19 +37,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     // Saat tombol "Tambah Bulan" diklik
-    UIManager.els.addMonthBtn.addEventListener('click', async () => {
-        // Berikan indikator visual sedang memuat metrik
-        const originalContent = UIManager.els.addMonthBtn.innerHTML;
-        UIManager.els.addMonthBtn.innerHTML = 'Memuat Metrik...';
-
-        // 1. Tarik ulang metrik dari Table1 untuk berjaga-jaga ada metrik baru
-        await fetchMetricsFromTable1();
-
-        // 2. Generate 12 bulan dan sel-sel (cells) nya
+    UIManager.els.addMonthBtn.addEventListener('click', () => {
+        // Langsung generate 12 bulan dan sel-sel (cells) nya dari memori
+        // Proses ini sekarang berjalan instan tanpa perlu loading ke server Grist
         BusinessLogic.addFullYear();
-
-        // 3. Kembalikan bentuk awal tombol
-        UIManager.els.addMonthBtn.innerHTML = originalContent;
     });
 
     UIManager.els.saveBtn.addEventListener('click', () => GristAPI.saveChanges());
@@ -57,7 +48,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 1. Inisialisasi Akses Grist API
     grist.ready({ requiredAccess: 'full' });
 
-    // 2. Ambil Metrik Predefined dari 'Table1' saat halaman pertama kali dibuka
+    // 2. Ambil Metrik Predefined dari 'Table1' SEKALI SAJA saat halaman pertama kali dibuka
     await fetchMetricsFromTable1();
 
     // 3. Pasang Listener untuk tabel utama (Tes)
