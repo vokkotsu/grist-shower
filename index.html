@@ -6,9 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Formulir Input Data Stakeholder</title>
     <!-- Memuat Grist API -->
-    <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+    <script
+        src="[https://docs.getgrist.com/grist-plugin-api.js](https://docs.getgrist.com/grist-plugin-api.js)"></script>
     <!-- Memuat Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="[https://cdn.tailwindcss.com](https://cdn.tailwindcss.com)"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -92,6 +93,12 @@
                     otomatis memetakan kembali ke tabel database Anda.</p>
             </div>
             <div class="flex gap-2 items-center">
+                <!-- Selector Tahun Dinamis -->
+                <select id="year-selector"
+                    class="bg-white dark:bg-gristDarkPanel border border-[#d9d9d9] dark:border-gristDarkBorder text-[#262633] dark:text-gristDarkText text-[13px] font-medium rounded py-1.5 px-2 focus:outline-none focus:border-[#1f78d1] cursor-pointer">
+                    <!-- Opsi tahun akan di-generate oleh JS -->
+                </select>
+
                 <button type="button" id="theme-toggle"
                     class="text-[#929299] dark:text-gristDarkMuted hover:bg-[#f7f7f7] dark:hover:bg-gristDarkPanel hover:text-[#262633] dark:hover:text-gristDarkText p-1.5 rounded transition duration-150 mr-2"
                     title="Ganti Tema">

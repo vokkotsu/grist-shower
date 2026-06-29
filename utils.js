@@ -38,8 +38,7 @@ function toGristDateString(formattedDateStr) {
     if (parts.length >= 2) {
         let mIndex = monthNamesShort.indexOf(parts[0]);
         if (mIndex !== -1) {
-            let y = parts[parts.length - 1];
-            if (y.length === 2) y = "20" + y; // Asumsi tahun 2000-an
+            let y = "20" + parts[parts.length - 1]; // "24" -> "2024"
             let m = String(mIndex + 1).padStart(2, '0');
             return `${y}-${m}-01`;
         }

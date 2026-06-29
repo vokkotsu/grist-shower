@@ -9,7 +9,7 @@ function renderTable() {
     thFirst.innerText = "IS in thousand USD";
     theadRow.appendChild(thFirst);
 
-    // Header Tanggal
+    // Header Tanggal (Disesuaikan dengan activeYear)
     uniqueDates.forEach(date => {
         let th = document.createElement('th');
         th.className = "bg-[#f7f7f7] dark:bg-gristDarkPanel text-[#929299] dark:text-gristDarkMuted text-[11px] uppercase tracking-wider font-semibold border border-[#d9d9d9] dark:border-gristDarkBorder p-2 text-center min-w-[120px] transition-colors duration-200";
@@ -55,6 +55,14 @@ function renderTable() {
         tbody.appendChild(tr);
     });
 }
+
+// Fitur Toggle Tahun (Merender ulang tabel saat tahun diganti)
+document.getElementById('year-selector').addEventListener('change', (e) => {
+    activeYear = parseInt(e.target.value);
+    // Perbarui uniqueDates dengan format tahun yang baru dipilih (misal: "Jan 25")
+    uniqueDates = monthNamesShort.map(m => m + ' ' + String(activeYear).slice(-2));
+    renderTable();
+});
 
 // Fitur Toggle Dark Mode
 const themeToggleBtn = document.getElementById('theme-toggle');

@@ -9,8 +9,6 @@ grist.onRecords(async function (records) {
     tableContainer.classList.add('hidden');
     errorBox.classList.add('hidden');
 
-    let yearToUse = String(new Date().getFullYear()).slice(-2);
-
     try {
         const refData = await grist.docApi.fetchTable(CONFIG.refTableId);
         if (refData && refData[CONFIG.refColMetric]) {
@@ -40,30 +38,47 @@ grist.onRecords(async function (records) {
 
     if (!records || records.length === 0) {
         allRecords = [];
-        uniqueDates = monthNamesShort.map(m => m + ' ' + yearToUse);
-        loadingDiv.classList.add('hidden');
-        tableContainer.classList.remove('hidden');
-        renderTable();
-        return;
+    } else {
+        const sampleRecord = records[0];
+        if (!(CONFIG.colDate in sampleRecord) || !(CONFIG.colMetric in sampleRecord) || !(CONFIG.colValue in sampleRecord)) {
+            errorBox.innerHTML = `<b>Error Konfigurasi Kolom</b>`;
+            errorBox.classList.remove('hidden');
+            loadingDiv.classList.add('hidden');
+            return;
+        }
+        allRecords = records;
     }
 
-    const sampleRecord = records[0];
-    if (!(CONFIG.colDate in sampleRecord) || !(CONFIG.colMetric in sampleRecord) || !(CONFIG.colValue in sampleRecord)) {
-        errorBox.innerHTML = `<b>Error Konfigurasi Kolom</b>`;
-        errorBox.classList.remove('hidden');
-        loadingDiv.classList.add('hidden');
-        return;
-    }
+    // Ekstrak semua tahun yang ada di database
+    const incomingDates = [...new Set(allRecords.map(r => parseGristDate(r[CONFIG.colDate])))].filter(Boolean);
+    let yearsInData = new Set();
+    incomingDates.forEach(d => {
+        const parts = d.split(' ');
+        if (parts.length >= 2) yearsInData.add(2000 + parseInt(parts[1]));
+    });
 
-    allRecords = records;
-    const incomingDates = [...new Set(records.map(r => parseGristDate(r[CONFIG.colDate])))].filter(Boolean);
+    // Tambahkan tahun saat ini dan beberapa tahun ke depan untuk proyeksi
+    let currentYr = new Date().getFullYear();
+    yearsInData.add(currentYr - 1);
+    yearsInData.add(currentYr);
+    yearsInData.add(currentYr + 1);
+    yearsInData.add(currentYr + 2);
+    yearsInData.add(currentYr + 3);
 
-    if (incomingDates.length > 0) {
-        const parts = incomingDates[0].split(' ');
-        if (parts.length >= 2) yearToUse = parts[1];
-    }
+    // Update Dropdown UI
+    const yearSelector = document.getElementById('year-selector');
+    yearSelector.innerHTML = '';
+    Array.from(yearsInData).sort().forEach(y => {
+        let opt = document.createElement('option');
+        opt.value = y;
+        opt.innerText = y;
+        if (y === activeYear) opt.selected = true;
+        yearSelector.appendChild(opt);
+    });
 
-    uniqueDates = monthNamesShort.map(m => m + ' ' + yearToUse);
+    // Tetapkan uniqueDates berdasarkan activeYear yang dipilih
+    uniqueDates = monthNamesShort.map(m => m + ' ' + String(activeYear).slice(-2));
+
     loadingDiv.classList.add('hidden');
     tableContainer.classList.remove('hidden');
     renderTable();
