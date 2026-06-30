@@ -136,7 +136,7 @@
             colValue: 'value',
         };
 
-        // --- FUNGSI EKSTRAK TAHUN ---
+        // --- FUNGSI EKSTRAK TAHUN (DIPERBARUI) ---
         function extractYear(val) {
             if (val === null || val === undefined || val === '') return 'N/A';
             try {
@@ -146,18 +146,16 @@
                 }
 
                 if (typeof val === 'string') {
-                    // Coba deteksi format YYYY-MM-DD
-                    const match = val.match(/^(\d{4})/);
-                    if (match) return match[1];
+                    // Deteksi paling handal: Cari 4 digit angka yang menyerupai tahun (19xx atau 20xx) di mana saja dalam string.
+                    // Ini akan berhasil membaca format "MMMM YYYY" seperti "Januari 2024" atau "Februari 2025"
+                    const yearMatch = val.match(/\b((?:19|20)\d{2})\b/);
+                    if (yearMatch) return yearMatch[1];
 
-                    // Coba deteksi format "Jan 25" atau "Jan 2025" (format widget utama)
-                    const matchShort = val.match(/^[a-zA-Z]{3}\s(\d{2,4})$/);
-                    if (matchShort) {
-                        let y = matchShort[1];
-                        return y.length === 2 ? "20" + y : y;
-                    }
+                    // Deteksi 2 digit tahun di akhir string dengan spasi (contoh: "Januari 25")
+                    const matchShort = val.match(/\s(\d{2})$/);
+                    if (matchShort) return "20" + matchShort[1];
 
-                    // Coba parsing ke Date
+                    // Fallback terakhir ke parsing Date JS
                     let d = new Date(val);
                     if (!isNaN(d.getTime())) return String(d.getUTCFullYear());
                 }
