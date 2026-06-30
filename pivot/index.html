@@ -136,35 +136,50 @@
             colValue: 'value',
         };
 
-        // --- FUNGSI EKSTRAK TAHUN (DIPERBARUI) ---
+        // --- FUNGSI EKSTRAK TAHUN (DIPERBARUI SANGAT AGRESIF) ---
         function extractYear(val) {
             if (val === null || val === undefined || val === '') return 'N/A';
+
             try {
-                // Deteksi format array Grist (misal: ["d", 1704067200])
-                if (Array.isArray(val) && val.length >= 2 && typeof val[1] === 'number') {
+                // 1. Deteksi format array Grist murni untuk Date (misal: ["d", 1704067200])
+                if (Array.isArray(val) && val[0] === 'd' && typeof val[1] === 'number') {
                     return String(new Date(val[1] * 1000).getUTCFullYear());
                 }
 
-                if (typeof val === 'string') {
-                    // Deteksi paling handal: Cari 4 digit angka yang menyerupai tahun (19xx atau 20xx) di mana saja dalam string.
-                    // Ini akan berhasil membaca format "MMMM YYYY" seperti "Januari 2024" atau "Februari 2025"
-                    const yearMatch = val.match(/\b((?:19|20)\d{2})\b/);
-                    if (yearMatch) return yearMatch[1];
-
-                    // Deteksi 2 digit tahun di akhir string dengan spasi (contoh: "Januari 25")
-                    const matchShort = val.match(/\s(\d{2})$/);
-                    if (matchShort) return "20" + matchShort[1];
-
-                    // Fallback terakhir ke parsing Date JS
-                    let d = new Date(val);
-                    if (!isNaN(d.getTime())) return String(d.getUTCFullYear());
-                }
+                // 2. Jika Grist kebetulan mengirim number/timestamp murni
                 if (typeof val === 'number') {
+                    // Cek jika number adalah tahun langsung (contoh: 2024)
+                    if (val >= 1900 && val <= 2100) return String(val);
+                    // Cek jika timestamp
                     let d = new Date(val > 100000000000 ? val : val * 1000);
                     return String(d.getUTCFullYear());
                 }
-            } catch (e) { console.warn("Format tanggal gagal diparsing", val); }
-            return 'Lainnya';
+
+                // 3. JURUS PAMUNGKAS: Paksa ubah APAPUN (array aneh, object referensi, string) menjadi teks biasa
+                let strVal = String(val);
+
+                // Cari 4 digit angka yang berawalan 19 atau 20 secara acak di mana saja dalam string tersebut
+                // Regex ini akan menyaring "Januari 2024" menjadi "2024" dengan mudah
+                const yearMatch = strVal.match(/(19|20)\d{2}/);
+                if (yearMatch) {
+                    return yearMatch[0]; // Kembalikan tepat 4 digit angkanya
+                }
+
+                // Deteksi 2 digit tahun di akhir string jika format pemisahnya spasi/koma/dsb (contoh: "Januari 25")
+                const matchShort = strVal.match(/[\s,-](\d{2})$/);
+                if (matchShort) return "20" + matchShort[1];
+
+                // Fallback terakhir ke fungsi parsing Date JS standar
+                let d = new Date(strVal);
+                if (!isNaN(d.getTime())) return String(d.getUTCFullYear());
+
+            } catch (e) {
+                console.warn("Format tanggal gagal diparsing", val);
+            }
+
+            // Jika semuanya gagal, kembalikan wujud asli datanya alih-alih tulisan "Lainnya", 
+            // sehingga jika gagal lagi, Anda bisa tahu bentuk data aneh seperti apa yang dikirim oleh Grist.
+            return String(val) || 'Lainnya';
         }
 
         // --- LOGIKA PIVOT ---
