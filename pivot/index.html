@@ -138,12 +138,25 @@
 
         // --- FUNGSI EKSTRAK TAHUN ---
         function extractYear(val) {
-            if (!val) return 'N/A';
+            if (val === null || val === undefined || val === '') return 'N/A';
             try {
+                // Deteksi format array Grist (misal: ["d", 1704067200])
+                if (Array.isArray(val) && val.length >= 2 && typeof val[1] === 'number') {
+                    return String(new Date(val[1] * 1000).getUTCFullYear());
+                }
+
                 if (typeof val === 'string') {
                     // Coba deteksi format YYYY-MM-DD
                     const match = val.match(/^(\d{4})/);
                     if (match) return match[1];
+
+                    // Coba deteksi format "Jan 25" atau "Jan 2025" (format widget utama)
+                    const matchShort = val.match(/^[a-zA-Z]{3}\s(\d{2,4})$/);
+                    if (matchShort) {
+                        let y = matchShort[1];
+                        return y.length === 2 ? "20" + y : y;
+                    }
+
                     // Coba parsing ke Date
                     let d = new Date(val);
                     if (!isNaN(d.getTime())) return String(d.getUTCFullYear());
