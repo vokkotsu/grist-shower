@@ -245,7 +245,7 @@
         }
 
         // --- INISIALISASI GRIST ---
-        grist.ready({ requiredAccess: 'read API' }); // Hanya butuh akses BACA
+        grist.ready({ requiredAccess: 'read table' }); // Perbaikan tingkat akses menjadi 'read table'
         grist.onRecords(records => {
             if (records && records.length > 0) {
                 processPivot(records);
