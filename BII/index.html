@@ -88,6 +88,16 @@
             </div>
 
             <div class="flex gap-2 items-center">
+                <!-- Dropdown Filter -->
+                <div class="flex gap-1 items-center mr-2 border-r pr-4 border-gray-200 dark:border-gray-700">
+                    <span class="text-[12px] text-gray-500 dark:text-gray-400">Periode:</span>
+                    <select id="filter-start"
+                        class="bg-transparent text-[12px] font-medium border border-gray-300 dark:border-gray-600 rounded p-1 focus:outline-none dark:text-white cursor-pointer"></select>
+                    <span class="text-[12px] text-gray-500">-</span>
+                    <select id="filter-end"
+                        class="bg-transparent text-[12px] font-medium border border-gray-300 dark:border-gray-600 rounded p-1 focus:outline-none dark:text-white cursor-pointer"></select>
+                </div>
+
                 <button type="button" id="theme-toggle"
                     class="text-[#929299] dark:text-gristDarkMuted hover:bg-[#f7f7f7] dark:hover:bg-gristDarkPanel p-1.5 rounded transition duration-150 mr-2"
                     title="Ganti Tema">

@@ -38,4 +38,19 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => UIManager.setSaveBtnState('default'), 2000);
         }
     });
+
+    // 5. Listener (Perubahan Filter Rentang Tanggal)
+    UIManager.els.filterStart.addEventListener('change', (e) => {
+        UIManager.saveCurrentInputsToState(); // Merekam cache/teks yang baru diketik sebelum tabel menghilang/refresh
+        AppState.filterStartVal = e.target.value;
+        BusinessLogic.applyDateFilter();
+        UIManager.renderTable();
+    });
+
+    UIManager.els.filterEnd.addEventListener('change', (e) => {
+        UIManager.saveCurrentInputsToState();
+        AppState.filterEndVal = e.target.value;
+        BusinessLogic.applyDateFilter();
+        UIManager.renderTable();
+    });
 });

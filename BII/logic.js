@@ -29,9 +29,38 @@ const BusinessLogic = {
         });
         AppState.uniqueRowGroups = Array.from(groupMap.values());
 
+        // Atur default nilai filter (Tampilkan semua secara default)
+        if (!AppState.filterStartVal || !AppState.uniqueDates.includes(AppState.filterStartVal)) {
+            AppState.filterStartVal = AppState.uniqueDates[0];
+        }
+        if (!AppState.filterEndVal || !AppState.uniqueDates.includes(AppState.filterEndVal)) {
+            AppState.filterEndVal = AppState.uniqueDates[AppState.uniqueDates.length - 1];
+        }
+
+        // Terapkan saringan rentang waktu sebelum dirender
+        this.applyDateFilter();
+
         // Render UI
+        UIManager.updateDateSelectors();
         UIManager.showTable();
         UIManager.renderTable();
+    },
+
+    applyDateFilter() {
+        const startNum = Utils.parseDateToNumber(AppState.filterStartVal);
+        const endNum = Utils.parseDateToNumber(AppState.filterEndVal);
+
+        // Pencegahan error jika pengguna memilih Tanggal Awal > Tanggal Akhir
+        if (startNum > endNum) {
+            AppState.filterEndVal = AppState.filterStartVal;
+            UIManager.updateDateSelectors(); // Paksa dropdown mereset ke angka valid
+        }
+
+        // Simpan hanya bulan-bulan yang berada di dalam rentang filter
+        AppState.filteredDates = AppState.uniqueDates.filter(d => {
+            const num = Utils.parseDateToNumber(d);
+            return num >= Utils.parseDateToNumber(AppState.filterStartVal) && num <= Utils.parseDateToNumber(AppState.filterEndVal);
+        });
     },
 
     generateSavePayload() {

@@ -9,7 +9,9 @@ const UIManager = {
         tbody: document.getElementById('table-body'),
         saveBtn: document.getElementById('save-btn'),
         errorModal: document.getElementById('error-modal'),
-        errorModalMsg: document.getElementById('error-modal-msg')
+        errorModalMsg: document.getElementById('error-modal-msg'),
+        filterStart: document.getElementById('filter-start'),
+        filterEnd: document.getElementById('filter-end')
     },
 
     showError(msg) {
@@ -56,6 +58,24 @@ const UIManager = {
         }
     },
 
+    // Perbarui dropdown filter berdasarkan data unik yang ada
+    updateDateSelectors() {
+        this.els.filterStart.innerHTML = '';
+        this.els.filterEnd.innerHTML = '';
+
+        AppState.uniqueDates.forEach(date => {
+            let opt1 = document.createElement('option');
+            opt1.value = date; opt1.innerText = date;
+            if (date === AppState.filterStartVal) opt1.selected = true;
+            this.els.filterStart.appendChild(opt1);
+
+            let opt2 = document.createElement('option');
+            opt2.value = date; opt2.innerText = date;
+            if (date === AppState.filterEndVal) opt2.selected = true;
+            this.els.filterEnd.appendChild(opt2);
+        });
+    },
+
     // Membangun tabel HTML secara dinamis (Mapping Data ke Matrix)
     renderTable() {
         this.els.thead.innerHTML = '';
@@ -72,7 +92,8 @@ const UIManager = {
         thSKU.innerText = "SKU / Grade";
         this.els.thead.appendChild(thSKU);
 
-        AppState.uniqueDates.forEach(date => {
+        // Ubah pembacaan uniqueDates menjadi filteredDates untuk kolom
+        AppState.filteredDates.forEach(date => {
             let th = document.createElement('th');
             th.className = "bg-[#f7f7f7] dark:bg-gristDarkPanel text-[#929299] dark:text-gristDarkMuted text-[11px] uppercase tracking-wider font-semibold border border-[#d9d9d9] dark:border-gristDarkBorder p-3 text-left min-w-[320px]";
             th.innerText = date;
@@ -93,8 +114,8 @@ const UIManager = {
             tdSKU.innerText = group.sku || '-';
             tr.appendChild(tdSKU);
 
-            // 3. Kolom Isian Berdasarkan Tanggal
-            AppState.uniqueDates.forEach(date => {
+            // 3. Kolom Isian Berdasarkan Tanggal (Hanya yang lolos filter)
+            AppState.filteredDates.forEach(date => {
                 let td = document.createElement('td');
                 td.className = "p-0 relative border border-[#d9d9d9] dark:border-gristDarkBorder bg-white dark:bg-gristDarkBg align-top";
 

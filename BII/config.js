@@ -1,7 +1,7 @@
 // config.js
 // Berisi pengaturan referensi nama tabel dan kolom, serta state/memori internal aplikasi.
 const Config = {
-    tableId: 'Yoko_journey',          // Ganti dengan Table ID yang sesuai (Cek Raw Data di Grist)
+    tableId: 'Journey',          // Ganti dengan Table ID yang sesuai (Cek Raw Data di Grist)
     colCompany: 'Company_Name', // ID Kolom Nama Perusahaan
     colSKU: 'SKU_Grade',        // ID Kolom SKU / Grade
     colDate: 'Date',            // ID Kolom Tanggal/Bulan
@@ -11,6 +11,9 @@ const Config = {
 const AppState = {
     allRecords: [],        // Kumpulan raw data dari Grist
     uniqueDates: [],       // Kumpulan bulan-bulan unik yang sudah terurut
+    filteredDates: [],     // Kumpulan bulan yang akan dirender berdasarkan rentang filter
     uniqueRowGroups: [],   // Gabungan antara Company Name & SKU untuk sisi kiri (Frozen Cols)
-    unsavedEdits: {}       // State memori untuk menampung ketikan sementara
+    unsavedEdits: {},      // State memori untuk menampung ketikan sementara
+    filterStartVal: null,  // Menyimpan nilai batas awal filter
+    filterEndVal: null     // Menyimpan nilai batas akhir filter
 };
