@@ -10,6 +10,7 @@
     <!-- Memuat Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
+        // Konfigurasi Tailwind untuk Dark Mode
         tailwind.config = {
             darkMode: 'class',
             theme: {
@@ -66,7 +67,7 @@
             background: #66667a;
         }
 
-        /* Dukungan CSS Modern untuk Auto-sizing Textarea (Chrome/Edge terbaru) */
+        /* Fitur konten textarea dinamis (Browser Modern) */
         textarea {
             field-sizing: content;
         }
@@ -77,24 +78,24 @@
     class="bg-white dark:bg-gristDarkBg m-0 p-0 h-screen flex flex-col text-[#262633] dark:text-gristDarkText transition-colors duration-200">
     <div class="w-full bg-white dark:bg-gristDarkBg flex flex-col h-full transition-colors duration-200">
 
-        <!-- Header -->
+        <!-- Header & Navigasi -->
         <div
             class="border-b border-[#d9d9d9] dark:border-gristDarkBorder py-2.5 px-4 flex justify-between items-center bg-white dark:bg-gristDarkBg z-10 flex-wrap gap-4 transition-colors duration-200">
             <div>
                 <h2 class="text-[15px] font-semibold text-[#262633] dark:text-gristDarkText">Project Update Tracker</h2>
                 <p class="text-[11px] text-[#929299] dark:text-gristDarkMuted mt-0.5">Edit progress/deskripsi secara
-                    berkala. Sel akan otomatis melebar sesuai panjang teks.</p>
+                    berkala. Sel otomatis menyesuaikan panjang teks.</p>
             </div>
 
             <div class="flex gap-2 items-center">
                 <button type="button" id="theme-toggle"
-                    class="text-[#929299] dark:text-gristDarkMuted hover:bg-[#f7f7f7] dark:hover:bg-gristDarkPanel hover:text-[#262633] dark:hover:text-gristDarkText p-1.5 rounded transition duration-150 mr-2"
+                    class="text-[#929299] dark:text-gristDarkMuted hover:bg-[#f7f7f7] dark:hover:bg-gristDarkPanel p-1.5 rounded transition duration-150 mr-2"
                     title="Ganti Tema">
                     <svg id="theme-toggle-light-icon" class="hidden w-4 h-4" fill="currentColor" viewBox="0 0 20 20"
                         xmlns="http://www.w3.org/2000/svg">
                         <path
-                            d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"
-                            fill-rule="evenodd" clip-rule="evenodd"></path>
+                            d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z">
+                        </path>
                     </svg>
                     <svg id="theme-toggle-dark-icon" class="hidden w-4 h-4" fill="currentColor" viewBox="0 0 20 20"
                         xmlns="http://www.w3.org/2000/svg">
@@ -121,7 +122,7 @@
             </div>
         </div>
 
-        <!-- Tabel Data -->
+        <!-- Tabel Data Grid -->
         <div id="table-container"
             class="hidden flex-grow overflow-auto p-0 relative bg-[#f7f7f7] dark:bg-[#1e1e24] transition-colors duration-200">
             <table class="w-full border-collapse text-sm bg-white dark:bg-gristDarkBg transition-colors duration-200">
@@ -133,7 +134,7 @@
         </div>
     </div>
 
-    <!-- Modal Dialog UI untuk Error -->
+    <!-- Modal Dialog UI untuk Error Grist API -->
     <div id="error-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
         <div
             class="bg-white dark:bg-gristDarkPanel rounded-lg shadow-xl max-w-lg w-full p-6 text-left border border-red-200 dark:border-red-900">
@@ -145,19 +146,18 @@
                 </svg>
                 Gagal Menyimpan Data
             </h3>
-            <p class="text-sm text-gray-700 dark:text-gray-300 mb-4">Grist API menolak aksi simpan (*write*). Berikut
-                adalah pesan error dari database:</p>
+            <p class="text-sm text-gray-700 dark:text-gray-300 mb-4">Grist API menolak aksi simpan. Berikut adalah pesan
+                error dari database:</p>
             <div class="bg-gray-100 dark:bg-gray-900 p-3 rounded text-xs font-mono text-red-600 dark:text-red-400 mb-4 whitespace-pre-wrap break-words border border-gray-200 dark:border-gray-700"
                 id="error-modal-msg"></div>
             <div class="text-sm text-gray-600 dark:text-gray-400 space-y-2 mb-6">
                 <p><strong>Cek 3 hal ini di tabel Grist Anda:</strong></p>
                 <ol class="list-decimal pl-5 space-y-1">
-                    <li>Apakah <code>tableId</code> di Config sudah benar-benar sesuai dengan ID asli tabel di Grist?
+                    <li>Apakah <code>tableId</code> di <code>config.js</code> sesuai dengan ID asli tabel?</li>
+                    <li>Pastikan kolom <code>Company_Name</code>, <code>SKU_Grade</code>, atau <code>Date</code>
+                        berjenis <strong>Text / Choice</strong>.</li>
+                    <li>Pastikan Anda sudah mengklik <strong>Accept (Terima Akses Penuh)</strong> di pita kuning widget.
                     </li>
-                    <li>Pastikan kolom <code>Company_Name</code> atau <code>Date</code> berjenis teks <strong>(Text /
-                            Choice)</strong>, bukan tipe Reference.</li>
-                    <li>Pastikan Anda sudah mengklik <strong>Accept (Terima Akses Penuh)</strong> di pita kuning saat
-                        pertama kali memasang widget ini.</li>
                 </ol>
             </div>
             <div class="flex justify-end">
@@ -167,275 +167,12 @@
         </div>
     </div>
 
-    <script>
-        // ==========================================
-        // 1. CONFIG
-        // ==========================================
-        const Config = {
-            tableId: 'Sheet1',          // <--- PASTIKAN INI ADALAH TABLE ID YANG BENAR
-            colCompany: 'Company_Name',
-            colSKU: 'SKU_Grade',
-            colDate: 'Date',
-            colDesc: 'Deskripsi'
-        };
-
-        const AppState = { allRecords: [], uniqueDates: [], uniqueRowGroups: [], unsavedEdits: {} };
-
-        // ==========================================
-        // 2. UTILS
-        // ==========================================
-        const Utils = {
-            monthOrder: { "JANUARY": 1, "FEBRUARY": 2, "MARCH": 3, "APRIL": 4, "MAY": 5, "JUNE": 6, "JULY": 7, "AUGUST": 8, "SEPTEMBER": 9, "OCTOBER": 10, "NOVEMBER": 11, "DECEMBER": 12 },
-            parseDateToNumber(dStr) {
-                if (!dStr) return 0;
-                let str = String(dStr).trim().toUpperCase();
-                let parts = str.split("'");
-                if (parts.length === 2) {
-                    let m = this.monthOrder[parts[0]] || 0;
-                    let y = parseInt(parts[1], 10);
-                    return (y * 100) + m;
-                }
-                return 9999;
-            },
-            sortDates(datesArray) {
-                return datesArray.sort((a, b) => this.parseDateToNumber(a) - this.parseDateToNumber(b));
-            },
-            // Logika Auto-Resize Textarea
-            autoResizeTextarea(element) {
-                element.style.height = 'auto'; // Reset height
-                element.style.height = (element.scrollHeight) + 'px'; // Sesuaikan ke isi konten
-            }
-        };
-
-        // ==========================================
-        // 3. UI MANAGER
-        // ==========================================
-        const UIManager = {
-            els: {
-                loadingPanel: document.getElementById('loading-panel'),
-                tableContainer: document.getElementById('table-container'),
-                errorBox: document.getElementById('error-box'),
-                thead: document.getElementById('table-head'),
-                tbody: document.getElementById('table-body'),
-                saveBtn: document.getElementById('save-btn')
-            },
-
-            showError(msg) {
-                this.els.errorBox.innerHTML = msg;
-                this.els.errorBox.classList.remove('hidden');
-                this.els.loadingPanel.classList.remove('hidden');
-                this.els.tableContainer.classList.add('hidden');
-            },
-
-            showTable() {
-                this.els.loadingPanel.classList.add('hidden');
-                this.els.errorBox.classList.add('hidden');
-                this.els.tableContainer.classList.remove('hidden');
-            },
-
-            setSaveBtnState(state) {
-                const btn = this.els.saveBtn;
-                if (state === 'loading') {
-                    btn.innerHTML = `<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle></svg> Menyimpan...`;
-                    btn.disabled = true;
-                    btn.className = "bg-gray-400 text-white font-medium py-1.5 px-3 rounded text-[13px] flex items-center shadow-sm cursor-not-allowed";
-                } else if (state === 'no-change') {
-                    btn.innerHTML = 'Tidak ada perubahan';
-                    btn.className = "bg-yellow-500 text-white font-medium py-1.5 px-3 rounded text-[13px] flex items-center shadow-sm";
-                } else if (state === 'success') {
-                    btn.innerHTML = `<svg class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg> Tersimpan`;
-                    btn.className = "bg-[#16b378] text-white font-medium py-1.5 px-3 rounded text-[13px] flex items-center shadow-sm";
-                } else if (state === 'error') {
-                    btn.innerHTML = 'Gagal Disimpan';
-                    btn.className = "bg-red-600 text-white font-medium py-1.5 px-3 rounded text-[13px] flex items-center shadow-sm";
-                } else {
-                    btn.innerHTML = `<svg class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg> Simpan Perubahan`;
-                    btn.disabled = false;
-                    btn.className = "bg-[#16b378] hover:bg-[#139a67] text-white font-medium py-1.5 px-3 rounded text-[13px] transition duration-150 flex items-center shadow-sm";
-                }
-            },
-
-            renderTable() {
-                this.els.thead.innerHTML = '';
-                this.els.tbody.innerHTML = '';
-
-                // Header Kiri (Frozen)
-                let thCompany = document.createElement('th');
-                thCompany.className = "bg-[#f7f7f7] dark:bg-gristDarkPanel text-[#929299] dark:text-gristDarkMuted text-[11px] uppercase tracking-wider font-semibold border border-[#d9d9d9] dark:border-gristDarkBorder p-3 text-left min-w-[250px] z-30 sticky left-0";
-                thCompany.innerText = "Company Name";
-                this.els.thead.appendChild(thCompany);
-
-                let thSKU = document.createElement('th');
-                thSKU.className = "bg-[#f7f7f7] dark:bg-gristDarkPanel text-[#929299] dark:text-gristDarkMuted text-[11px] uppercase tracking-wider font-semibold border border-[#d9d9d9] dark:border-gristDarkBorder p-3 text-left min-w-[200px] z-30 sticky left-[250px]";
-                thSKU.innerText = "SKU / Grade";
-                this.els.thead.appendChild(thSKU);
-
-                // Lebar kolom tanggal diperlebar sedikit menjadi min-w-[320px] agar lebih leluasa membaca kalimat
-                AppState.uniqueDates.forEach(date => {
-                    let th = document.createElement('th');
-                    th.className = "bg-[#f7f7f7] dark:bg-gristDarkPanel text-[#929299] dark:text-gristDarkMuted text-[11px] uppercase tracking-wider font-semibold border border-[#d9d9d9] dark:border-gristDarkBorder p-3 text-left min-w-[320px]";
-                    th.innerText = date;
-                    this.els.thead.appendChild(th);
-                });
-
-                AppState.uniqueRowGroups.forEach(group => {
-                    let tr = document.createElement('tr');
-
-                    let tdCompany = document.createElement('td');
-                    tdCompany.className = "bg-[#f7f7f7] dark:bg-gristDarkPanel text-[#262633] dark:text-gristDarkText text-[13px] font-medium border border-[#d9d9d9] dark:border-gristDarkBorder p-3 align-top sticky left-0 z-10 whitespace-normal bg-white dark:bg-gristDarkBg";
-                    tdCompany.innerText = group.company || '-';
-                    tr.appendChild(tdCompany);
-
-                    let tdSKU = document.createElement('td');
-                    tdSKU.className = "bg-[#f7f7f7] dark:bg-gristDarkPanel text-[#262633] dark:text-gristDarkText text-[13px] font-medium border border-[#d9d9d9] dark:border-gristDarkBorder p-3 align-top sticky left-[250px] z-10 whitespace-normal bg-white dark:bg-gristDarkBg";
-                    tdSKU.innerText = group.sku || '-';
-                    tr.appendChild(tdSKU);
-
-                    AppState.uniqueDates.forEach(date => {
-                        let td = document.createElement('td');
-                        td.className = "p-0 relative border border-[#d9d9d9] dark:border-gristDarkBorder bg-white dark:bg-gristDarkBg align-top";
-
-                        let matched = AppState.allRecords.find(r => r[Config.colCompany] === group.company && r[Config.colSKU] === group.sku && r[Config.colDate] === date);
-                        let val = matched && matched[Config.colDesc] !== null ? matched[Config.colDesc] : '';
-                        let recordId = matched ? matched.id : '';
-
-                        const editKey = `${group.company}|${group.sku}|${date}`;
-                        if (AppState.unsavedEdits[editKey] !== undefined) val = AppState.unsavedEdits[editKey];
-
-                        let input = document.createElement('textarea');
-                        // Dibuat overflow-hidden dan resize-none agar tidak ada scrollbar di dalam, melainkan kotak yg memanjang
-                        input.className = "w-full min-h-[80px] overflow-hidden resize-none block p-3 bg-transparent text-[13px] text-[#262633] dark:text-gristDarkText leading-relaxed focus:outline-none focus:ring-0 focus:shadow-[inset_0_0_0_2px_#1f78d1] focus:bg-blue-50/30 dark:focus:bg-[#1f78d1]/20";
-                        input.value = val;
-                        input.placeholder = "Tambahkan catatan...";
-                        input.dataset.id = recordId;
-                        input.dataset.date = date;
-                        input.dataset.company = group.company;
-                        input.dataset.sku = group.sku;
-
-                        // Event Listener: Otomatis resize saat pengguna mengetik dan simpan ke state memori
-                        input.addEventListener('input', function () {
-                            Utils.autoResizeTextarea(this);
-                            AppState.unsavedEdits[`${this.dataset.company}|${this.dataset.sku}|${this.dataset.date}`] = this.value;
-                        });
-
-                        td.appendChild(input);
-                        tr.appendChild(td);
-
-                        // Memicu perhitungan tinggi textarea sesaat setelah diletakkan ke dalam DOM tabel
-                        setTimeout(() => Utils.autoResizeTextarea(input), 0);
-                    });
-                    this.els.tbody.appendChild(tr);
-                });
-            }
-        };
-
-        // ==========================================
-        // 4. BUSINESS LOGIC
-        // ==========================================
-        const BusinessLogic = {
-            processIncomingRecords(records) {
-                if (!records || records.length === 0) {
-                    UIManager.showError("Data kosong. Silakan isi beberapa baris di Grist.");
-                    return;
-                }
-
-                const sample = records[0];
-                if (!(Config.colCompany in sample) || !(Config.colSKU in sample) || !(Config.colDate in sample) || !(Config.colDesc in sample)) {
-                    let cols = Object.keys(sample).filter(k => k !== 'id').join(', ');
-                    UIManager.showError(`<b>Error Kolom:</b> Pastikan ID Kolom di Grist persis: ${Config.colCompany}, ${Config.colSKU}, ${Config.colDate}, ${Config.colDesc}. <br><br>Tersedia saat ini: ${cols}`);
-                    return;
-                }
-
-                AppState.allRecords = records;
-
-                let rawDates = [...new Set(records.map(r => r[Config.colDate]))].filter(Boolean);
-                AppState.uniqueDates = Utils.sortDates(rawDates);
-
-                const groupMap = new Map();
-                records.forEach(r => {
-                    const c = r[Config.colCompany] || '';
-                    const s = r[Config.colSKU] || '';
-                    if (c || s) groupMap.set(`${c}|${s}`, { company: c, sku: s });
-                });
-                AppState.uniqueRowGroups = Array.from(groupMap.values());
-
-                UIManager.showTable();
-                UIManager.renderTable();
-            },
-
-            generateSavePayload() {
-                const apiActions = [];
-                const inputs = document.querySelectorAll('#table-body textarea');
-
-                inputs.forEach(input => {
-                    const id = parseInt(input.dataset.id);
-                    const val = input.value.trim();
-
-                    if (id) {
-                        const original = AppState.allRecords.find(r => r.id === id);
-                        if (original && String(original[Config.colDesc] || '').trim() !== val) {
-                            apiActions.push(['UpdateRecord', Config.tableId, id, { [Config.colDesc]: val }]);
-                        }
-                    } else if (val !== '') {
-                        apiActions.push(['AddRecord', Config.tableId, null, {
-                            [Config.colDate]: input.dataset.date,
-                            [Config.colCompany]: input.dataset.company,
-                            [Config.colSKU]: input.dataset.sku,
-                            [Config.colDesc]: val
-                        }]);
-                    }
-                });
-                return apiActions;
-            }
-        };
-
-        // ==========================================
-        // 5. THEME MANAGER & INIT
-        // ==========================================
-        document.addEventListener('DOMContentLoaded', () => {
-            const btn = document.getElementById('theme-toggle');
-            const darkIcon = document.getElementById('theme-toggle-dark-icon');
-            const lightIcon = document.getElementById('theme-toggle-light-icon');
-            if (document.documentElement.classList.contains('dark')) lightIcon.classList.remove('hidden');
-            else darkIcon.classList.remove('hidden');
-            btn.addEventListener('click', () => {
-                darkIcon.classList.toggle('hidden');
-                lightIcon.classList.toggle('hidden');
-                document.documentElement.classList.toggle('dark');
-                localStorage.setItem('color-theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
-            });
-
-            grist.ready({ requiredAccess: 'full' });
-
-            grist.onRecords(records => {
-                BusinessLogic.processIncomingRecords(records);
-            });
-
-            document.getElementById('save-btn').addEventListener('click', async () => {
-                const actions = BusinessLogic.generateSavePayload();
-                if (actions.length === 0) {
-                    UIManager.setSaveBtnState('no-change');
-                    setTimeout(() => UIManager.setSaveBtnState('default'), 2000);
-                    return;
-                }
-
-                try {
-                    UIManager.setSaveBtnState('loading');
-                    await grist.docApi.applyUserActions(actions);
-                    AppState.unsavedEdits = {};
-                    UIManager.setSaveBtnState('success');
-                } catch (error) {
-                    console.error("Grist API Error:", error);
-                    UIManager.setSaveBtnState('error');
-
-                    document.getElementById('error-modal-msg').innerText = error.message;
-                    document.getElementById('error-modal').classList.remove('hidden');
-                } finally {
-                    setTimeout(() => UIManager.setSaveBtnState('default'), 2000);
-                }
-            });
-        });
-    </script>
+    <!-- Modul JavaScript Eksternal (Urutan Eksekusi Harus Sesuai) -->
+    <script src="config.js"></script>
+    <script src="utils.js"></script>
+    <script src="ui.js"></script>
+    <script src="logic.js"></script>
+    <script src="main.js"></script>
 </body>
 
 </html>
