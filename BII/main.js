@@ -1,12 +1,43 @@
 // main.js
 // Entry-point (Titik mulai) untuk aplikasi. Menghubungkan Grist ke fungsi lokal.
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Inisialisasi Tombol Tema & Dropdown Tabel
+    // 1. Inisialisasi Tombol Tema (Inisialisasi tabel selector dipindah ke bawah)
     ThemeManager.init();
-    UIManager.initTableSelector();
 
     // 2. Hubungkan & Minta Izin ke Grist
     grist.ready({ requiredAccess: 'full' });
+
+    let isAppReady = false;
+
+    // FUNGSI BARU: Mencari semua tabel 'Journey' di Grist secara dinamis
+    const fetchAvailableTables = async () => {
+        try {
+            UIManager.els.loadingText.innerText = "Memindai daftar tabel Journey...";
+            UIManager.els.loadingPanel.classList.remove('hidden');
+
+            // Mengakses tabel sistem internal Grist yang menyimpan daftar tabel
+            const metaTable = await grist.docApi.fetchTable('_grist_Tables');
+            if (metaTable && metaTable.tableId) {
+                // Filter: Hanya ambil tabel yang namanya mengandung kata 'journey' (huruf besar/kecil bebas)
+                const journeyTables = metaTable.tableId.filter(id => id.toLowerCase().includes('journey'));
+
+                if (journeyTables.length > 0) {
+                    Config.tables = journeyTables.sort(); // Urutkan sesuai abjad
+                    // Jika tabel default tidak ada, gunakan tabel pertama yang ditemukan
+                    if (!Config.tables.includes(Config.currentTableId)) {
+                        Config.currentTableId = Config.tables[0];
+                    }
+                }
+            }
+        } catch (error) {
+            console.error("Gagal membaca metadata Grist:", error);
+            // Fallback (Cadangan) jika gagal membaca sistem Grist
+            if (Config.tables.length === 0) Config.tables = [Config.currentTableId];
+        }
+
+        // Inisialisasi dropdown di UI setelah daftar tabel didapat
+        UIManager.initTableSelector();
+    };
 
     // FUNGSI BARU: Menarik data secara manual dari tabel mana saja melalui API
     const loadDataFromTable = async (tableId) => {
@@ -25,9 +56,14 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // 3. Listener (Menerima Data Awal atau Auto-Refresh)
-    grist.onRecords(() => {
-        // Abaikan records otomatis bawaan Grist (karena kita punya multiple tables),
-        // gunakan listener ini hanya sebagai pemicu untuk refresh tabel yang aktif.
+    grist.onRecords(async () => {
+        // Saat widget pertama kali dimuat, scan tabelnya terlebih dahulu
+        if (!isAppReady) {
+            isAppReady = true;
+            await fetchAvailableTables();
+        }
+
+        // Tarik data dari tabel yang sedang aktif
         loadDataFromTable(Config.currentTableId);
     });
 
