@@ -46,7 +46,20 @@ document.addEventListener('DOMContentLoaded', () => {
             UIManager.els.loadingPanel.classList.remove('hidden');
             UIManager.els.tableContainer.classList.add('hidden');
 
-            const records = await grist.docApi.fetchTable(tableId);
+            // Mengambil data menggunakan API (Format Kolom)
+            const rawData = await grist.docApi.fetchTable(tableId);
+
+            // PERBAIKAN: Konversi dari format "Kolom" ke format "Baris" agar bisa dibaca BusinessLogic
+            const records = [];
+            if (rawData && rawData.id) {
+                const keys = Object.keys(rawData);
+                for (let i = 0; i < rawData.id.length; i++) {
+                    let row = {};
+                    keys.forEach(k => row[k] = rawData[k][i]);
+                    records.push(row);
+                }
+            }
+
             AppState.unsavedEdits = {}; // Reset memori ketikan saat pindah tabel
             BusinessLogic.processIncomingRecords(records);
         } catch (error) {

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -26,66 +27,125 @@
         }
     </script>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-        ::-webkit-scrollbar { height: 10px; width: 10px; }
-        ::-webkit-scrollbar-track { background: #f7f7f7; border-left: 1px solid #d9d9d9; border-top: 1px solid #d9d9d9; }
-        ::-webkit-scrollbar-thumb { background: #cccccc; border: 2px solid #f7f7f7; border-radius: 5px; }
-        ::-webkit-scrollbar-thumb:hover { background: #a6a6a6; }
-        .dark ::-webkit-scrollbar-track { background: #262633; border-color: #3e3e4a; border-top: none; }
-        .dark ::-webkit-scrollbar-thumb { background: #4b4b5a; border: 2px solid #262633; }
-        .dark ::-webkit-scrollbar-thumb:hover { background: #66667a; }
-        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        ::-webkit-scrollbar {
+            height: 10px;
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f7f7f7;
+            border-left: 1px solid #d9d9d9;
+            border-top: 1px solid #d9d9d9;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cccccc;
+            border: 2px solid #f7f7f7;
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a6a6a6;
+        }
+
+        .dark ::-webkit-scrollbar-track {
+            background: #262633;
+            border-color: #3e3e4a;
+            border-top: none;
+        }
+
+        .dark ::-webkit-scrollbar-thumb {
+            background: #4b4b5a;
+            border: 2px solid #262633;
+        }
+
+        .dark ::-webkit-scrollbar-thumb:hover {
+            background: #66667a;
+        }
+
         /* Fitur konten textarea dinamis (Browser Modern) */
-        textarea { field-sizing: content; }
+        textarea {
+            field-sizing: content;
+        }
     </style>
 </head>
 
-<body class="bg-white dark:bg-gristDarkBg m-0 p-0 h-screen flex flex-col text-[#262633] dark:text-gristDarkText transition-colors duration-200">
+<body
+    class="bg-white dark:bg-gristDarkBg m-0 p-0 h-screen flex flex-col text-[#262633] dark:text-gristDarkText transition-colors duration-200">
     <div class="w-full bg-white dark:bg-gristDarkBg flex flex-col h-full transition-colors duration-200">
-        
+
         <!-- Header & Navigasi -->
-        <div class="border-b border-[#d9d9d9] dark:border-gristDarkBorder py-2.5 px-4 flex justify-between items-center bg-white dark:bg-gristDarkBg z-10 flex-wrap gap-4 transition-colors duration-200">
+        <div
+            class="border-b border-[#d9d9d9] dark:border-gristDarkBorder py-2.5 px-4 flex justify-between items-center bg-white dark:bg-gristDarkBg z-10 flex-wrap gap-4 transition-colors duration-200">
             <div>
                 <h2 class="text-[15px] font-semibold text-[#262633] dark:text-gristDarkText">Project Update Tracker</h2>
-                <p class="text-[11px] text-[#929299] dark:text-gristDarkMuted mt-0.5">Edit progress/deskripsi secara berkala. Sel otomatis menyesuaikan panjang teks.</p>
+                <p class="text-[11px] text-[#929299] dark:text-gristDarkMuted mt-0.5">Edit progress/deskripsi secara
+                    berkala. Sel otomatis menyesuaikan panjang teks.</p>
             </div>
-            
+
             <div class="flex gap-2 items-center">
                 <!-- Dropdown Pilih Tabel -->
                 <div class="flex gap-1 items-center mr-2 border-r pr-4 border-gray-200 dark:border-gray-700">
                     <span class="text-[12px] text-gray-500 dark:text-gray-400">Tabel:</span>
-                    <select id="table-selector" class="bg-transparent text-[12px] font-medium border border-gray-300 dark:border-gray-600 rounded p-1 focus:outline-none dark:text-white cursor-pointer"></select>
+                    <select id="table-selector"
+                        class="bg-transparent text-[12px] font-medium border border-gray-300 dark:border-gray-600 rounded p-1 focus:outline-none dark:text-white cursor-pointer"></select>
                 </div>
 
                 <!-- Dropdown Filter -->
                 <div class="flex gap-1 items-center mr-2 border-r pr-4 border-gray-200 dark:border-gray-700">
                     <span class="text-[12px] text-gray-500 dark:text-gray-400">Periode:</span>
-                    <select id="filter-start" class="bg-transparent text-[12px] font-medium border border-gray-300 dark:border-gray-600 rounded p-1 focus:outline-none dark:text-white cursor-pointer"></select>
+                    <select id="filter-start"
+                        class="bg-transparent text-[12px] font-medium border border-gray-300 dark:border-gray-600 rounded p-1 focus:outline-none dark:text-white cursor-pointer"></select>
                     <span class="text-[12px] text-gray-500">-</span>
-                    <select id="filter-end" class="bg-transparent text-[12px] font-medium border border-gray-300 dark:border-gray-600 rounded p-1 focus:outline-none dark:text-white cursor-pointer"></select>
+                    <select id="filter-end"
+                        class="bg-transparent text-[12px] font-medium border border-gray-300 dark:border-gray-600 rounded p-1 focus:outline-none dark:text-white cursor-pointer"></select>
                 </div>
-                
-                <button type="button" id="theme-toggle" class="text-[#929299] dark:text-gristDarkMuted hover:bg-[#f7f7f7] dark:hover:bg-gristDarkPanel p-1.5 rounded transition duration-150 mr-2" title="Ganti Tema">
-                    <svg id="theme-toggle-light-icon" class="hidden w-4 h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"></path></svg>
-                    <svg id="theme-toggle-dark-icon" class="hidden w-4 h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+
+                <button type="button" id="theme-toggle"
+                    class="text-[#929299] dark:text-gristDarkMuted hover:bg-[#f7f7f7] dark:hover:bg-gristDarkPanel p-1.5 rounded transition duration-150 mr-2"
+                    title="Ganti Tema">
+                    <svg id="theme-toggle-light-icon" class="hidden w-4 h-4" fill="currentColor" viewBox="0 0 20 20"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z">
+                        </path>
+                    </svg>
+                    <svg id="theme-toggle-dark-icon" class="hidden w-4 h-4" fill="currentColor" viewBox="0 0 20 20"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+                    </svg>
                 </button>
-                <button type="button" id="save-btn" class="bg-[#16b378] hover:bg-[#139a67] text-white font-medium py-1.5 px-3 rounded text-[13px] transition duration-150 flex items-center gap-1.5 shadow-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                <button type="button" id="save-btn"
+                    class="bg-[#16b378] hover:bg-[#139a67] text-white font-medium py-1.5 px-3 rounded text-[13px] transition duration-150 flex items-center gap-1.5 shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
                     Simpan Perubahan
                 </button>
             </div>
         </div>
 
         <!-- Status Panel -->
-        <div id="loading-panel" class="flex-grow flex flex-col items-center justify-center text-center p-6 text-gray-500 dark:text-gristDarkMuted transition-colors duration-200">
+        <div id="loading-panel"
+            class="flex-grow flex flex-col items-center justify-center text-center p-6 text-gray-500 dark:text-gristDarkMuted transition-colors duration-200">
             <p id="loading-text" class="text-[13px] font-medium">Memproses data dari Grist...</p>
-            <div id="error-box" class="hidden mt-4 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 p-4 rounded border border-red-200 dark:border-red-800 text-left max-w-lg text-[13px]"></div>
+            <div id="error-box"
+                class="hidden mt-4 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 p-4 rounded border border-red-200 dark:border-red-800 text-left max-w-lg text-[13px]">
+            </div>
         </div>
 
         <!-- Tabel Data Grid -->
-        <div id="table-container" class="hidden flex-grow overflow-auto p-0 relative bg-[#f7f7f7] dark:bg-[#1e1e24] transition-colors duration-200">
+        <div id="table-container"
+            class="hidden flex-grow overflow-auto p-0 relative bg-[#f7f7f7] dark:bg-[#1e1e24] transition-colors duration-200">
             <table class="w-full border-collapse text-sm bg-white dark:bg-gristDarkBg transition-colors duration-200">
-                <thead class="sticky top-0 z-20 shadow-sm"><tr id="table-head"></tr></thead>
+                <thead class="sticky top-0 z-20 shadow-sm">
+                    <tr id="table-head"></tr>
+                </thead>
                 <tbody id="table-body"></tbody>
             </table>
         </div>
@@ -93,23 +153,33 @@
 
     <!-- Modal Dialog UI untuk Error Grist API -->
     <div id="error-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-gristDarkPanel rounded-lg shadow-xl max-w-lg w-full p-6 text-left border border-red-200 dark:border-red-900">
+        <div
+            class="bg-white dark:bg-gristDarkPanel rounded-lg shadow-xl max-w-lg w-full p-6 text-left border border-red-200 dark:border-red-900">
             <h3 class="text-lg font-bold text-red-600 dark:text-red-400 mb-2 flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
                 Gagal Menyimpan Data
             </h3>
-            <p class="text-sm text-gray-700 dark:text-gray-300 mb-4">Grist API menolak aksi simpan. Berikut adalah pesan error dari database:</p>
-            <div class="bg-gray-100 dark:bg-gray-900 p-3 rounded text-xs font-mono text-red-600 dark:text-red-400 mb-4 whitespace-pre-wrap break-words border border-gray-200 dark:border-gray-700" id="error-modal-msg"></div>
+            <p class="text-sm text-gray-700 dark:text-gray-300 mb-4">Grist API menolak aksi simpan. Berikut adalah pesan
+                error dari database:</p>
+            <div class="bg-gray-100 dark:bg-gray-900 p-3 rounded text-xs font-mono text-red-600 dark:text-red-400 mb-4 whitespace-pre-wrap break-words border border-gray-200 dark:border-gray-700"
+                id="error-modal-msg"></div>
             <div class="text-sm text-gray-600 dark:text-gray-400 space-y-2 mb-6">
                 <p><strong>Cek 3 hal ini di tabel Grist Anda:</strong></p>
                 <ol class="list-decimal pl-5 space-y-1">
                     <li>Apakah <code>tableId</code> di <code>config.js</code> sesuai dengan ID asli tabel?</li>
-                    <li>Pastikan kolom <code>Company_Name</code>, <code>SKU_Grade</code>, atau <code>Date</code> berjenis <strong>Text / Choice</strong>.</li>
-                    <li>Pastikan Anda sudah mengklik <strong>Accept (Terima Akses Penuh)</strong> di pita kuning widget.</li>
+                    <li>Pastikan kolom <code>Company_Name</code>, <code>SKU_Grade</code>, atau <code>Date</code>
+                        berjenis <strong>Text / Choice</strong>.</li>
+                    <li>Pastikan Anda sudah mengklik <strong>Accept (Terima Akses Penuh)</strong> di pita kuning widget.
+                    </li>
                 </ol>
             </div>
             <div class="flex justify-end">
-                <button onclick="document.getElementById('error-modal').classList.add('hidden')" class="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-white px-4 py-2 rounded text-sm font-medium transition">Tutup</button>
+                <button onclick="document.getElementById('error-modal').classList.add('hidden')"
+                    class="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-white px-4 py-2 rounded text-sm font-medium transition">Tutup</button>
             </div>
         </div>
     </div>
@@ -121,4 +191,5 @@
     <script src="logic.js"></script>
     <script src="main.js"></script>
 </body>
+
 </html>
