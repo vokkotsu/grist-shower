@@ -77,10 +77,12 @@ const BusinessLogic = {
             if (id) {
                 const original = AppState.allRecords.find(r => r.id === id);
                 if (original && String(original[Config.colDesc] || '').trim() !== val) {
-                    apiActions.push(['UpdateRecord', Config.tableId, id, { [Config.colDesc]: val }]);
+                    // MENGGUNAKAN Config.currentTableId
+                    apiActions.push(['UpdateRecord', Config.currentTableId, id, { [Config.colDesc]: val }]);
                 }
             } else if (val !== '') {
-                apiActions.push(['AddRecord', Config.tableId, null, {
+                // MENGGUNAKAN Config.currentTableId
+                apiActions.push(['AddRecord', Config.currentTableId, null, {
                     [Config.colDate]: input.dataset.date,
                     [Config.colCompany]: input.dataset.company,
                     [Config.colSKU]: input.dataset.sku,

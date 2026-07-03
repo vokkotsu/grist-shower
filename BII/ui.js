@@ -1,8 +1,8 @@
 // ui.js
-// Menangani semua manipulasi tampilan HTML (DOM), event click standar, dan tema gelap.
 const UIManager = {
     els: {
         loadingPanel: document.getElementById('loading-panel'),
+        loadingText: document.getElementById('loading-text'),
         tableContainer: document.getElementById('table-container'),
         errorBox: document.getElementById('error-box'),
         thead: document.getElementById('table-head'),
@@ -11,7 +11,20 @@ const UIManager = {
         errorModal: document.getElementById('error-modal'),
         errorModalMsg: document.getElementById('error-modal-msg'),
         filterStart: document.getElementById('filter-start'),
-        filterEnd: document.getElementById('filter-end')
+        filterEnd: document.getElementById('filter-end'),
+        tableSelector: document.getElementById('table-selector') // Ditambahkan
+    },
+
+    // Membangun daftar pilihan tabel dari Config.tables
+    initTableSelector() {
+        this.els.tableSelector.innerHTML = '';
+        Config.tables.forEach(table => {
+            let opt = document.createElement('option');
+            opt.value = table;
+            opt.innerText = table.replace(/_/g, ' '); // Mempercantik nama di UI (menghapus underscore)
+            if (table === Config.currentTableId) opt.selected = true;
+            this.els.tableSelector.appendChild(opt);
+        });
     },
 
     showError(msg) {
