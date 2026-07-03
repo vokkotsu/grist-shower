@@ -4,10 +4,35 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1. Inisialisasi Tombol Tema
     ThemeManager.init();
 
+    // PERBAIKAN UI: Optimasi Dark Mode untuk Dropdown (Select)
+    document.querySelectorAll('select').forEach(select => {
+        select.classList.remove('bg-transparent');
+        select.classList.add('bg-white', 'dark:bg-gristDarkPanel', 'dark:text-white');
+    });
+
     // 2. Hubungkan & Minta Izin ke Grist (Akses Penuh Wajib)
     grist.ready({ requiredAccess: 'full' });
 
     let isAppReady = false;
+
+    // FUNGSI BARU: Mematikan (disable) pilihan bulan akhir yang lebih lampau dari bulan awal
+    const updateFilterEndOptions = () => {
+        if (!AppState.filterStartVal || !UIManager.els.filterEnd) return;
+
+        const startNum = Utils.parseDateToNumber(AppState.filterStartVal);
+
+        Array.from(UIManager.els.filterEnd.options).forEach(opt => {
+            const optNum = Utils.parseDateToNumber(opt.value);
+            // Jika tanggal opsi lebih kecil (sebelum) tanggal mulai, matikan opsi tersebut
+            if (optNum < startNum) {
+                opt.disabled = true;
+                opt.style.color = '#9ca3af'; // Warnai abu-abu pudar
+            } else {
+                opt.disabled = false;
+                opt.style.color = ''; // Kembalikan ke warna normal
+            }
+        });
+    };
 
     // FUNGSI: Mencari semua tabel buatan pengguna di Grist secara dinamis
     const fetchAvailableTables = async () => {
@@ -81,10 +106,13 @@ document.addEventListener('DOMContentLoaded', () => {
             // Kirim ke Logic
             BusinessLogic.processIncomingRecords(records);
 
+            // Perbarui ketersediaan opsi dropdown "Sampai (End)" saat data baru dimuat
+            updateFilterEndOptions();
+
         } catch (error) {
             console.error("Gagal mengambil tabel:", error);
 
-            // PERBAIKAN: Menampilkan log error ASLI dari sistem ke layar UI
+            // Menampilkan log error ASLI dari sistem ke layar UI
             UIManager.showError(
                 `<div class="text-left">
                     <p class="font-bold text-red-600 mb-2">Gagal memproses tabel: <u>${tableId}</u></p>
@@ -144,6 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
         AppState.filterStartVal = e.target.value;
         BusinessLogic.applyDateFilter();
         UIManager.renderTable();
+        updateFilterEndOptions(); // Kunci opsi kadaluwarsa saat Start berubah
     });
 
     UIManager.els.filterEnd.addEventListener('change', (e) => {
@@ -151,5 +180,6 @@ document.addEventListener('DOMContentLoaded', () => {
         AppState.filterEndVal = e.target.value;
         BusinessLogic.applyDateFilter();
         UIManager.renderTable();
+        updateFilterEndOptions();
     });
 });
