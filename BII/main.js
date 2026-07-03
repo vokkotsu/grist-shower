@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    // FUNGSI: Mencari semua tabel buatan pengguna di Grist secara dinamis
+    // FUNGSI: Mencari tabel "Journey" di Grist secara dinamis
     const fetchAvailableTables = async () => {
         try {
             UIManager.els.loadingText.innerText = "Memindai daftar tabel di database...";
@@ -42,10 +42,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const metaTable = await grist.docApi.fetchTable('_grist_Tables');
             if (metaTable && metaTable.tableId) {
-                const userTables = metaTable.tableId.filter(id => !id.startsWith('_'));
+                // DIKEMBALIKAN: Filter hanya tabel yang ID-nya mengandung kata 'journey'
+                const journeyTables = metaTable.tableId.filter(id => id.toLowerCase().includes('journey'));
 
-                if (userTables.length > 0) {
-                    Config.tables = userTables.sort();
+                if (journeyTables.length > 0) {
+                    Config.tables = journeyTables.sort();
                     if (!Config.tables.includes(Config.currentTableId)) {
                         Config.currentTableId = Config.tables[0];
                     }
