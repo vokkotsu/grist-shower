@@ -8,22 +8,26 @@ const UIManager = {
         thead: document.getElementById('table-head'),
         tbody: document.getElementById('table-body'),
         saveBtn: document.getElementById('save-btn'),
-        errorModal: document.getElementById('error-modal'),
-        errorModalMsg: document.getElementById('error-modal-msg'),
         filterStart: document.getElementById('filter-start'),
         filterEnd: document.getElementById('filter-end'),
-        tableSelector: document.getElementById('table-selector') // Ditambahkan
+        nameSelector: document.getElementById('name-selector')
     },
 
-    // Membangun daftar pilihan tabel dari Config.tables
-    initTableSelector() {
-        this.els.tableSelector.innerHTML = '';
-        Config.tables.forEach(table => {
+    initNameSelector() {
+        this.els.nameSelector.innerHTML = '';
+        if (AppState.uniqueNames.length === 0) {
             let opt = document.createElement('option');
-            opt.value = table;
-            opt.innerText = table.replace(/_/g, ' '); // Mempercantik nama di UI (menghapus underscore)
-            if (table === Config.currentTableId) opt.selected = true;
-            this.els.tableSelector.appendChild(opt);
+            opt.innerText = "- Kosong -";
+            this.els.nameSelector.appendChild(opt);
+            return;
+        }
+
+        AppState.uniqueNames.forEach(name => {
+            let opt = document.createElement('option');
+            opt.value = name;
+            opt.innerText = name;
+            if (name === AppState.currentNameFilter) opt.selected = true;
+            this.els.nameSelector.appendChild(opt);
         });
     },
 
@@ -40,7 +44,6 @@ const UIManager = {
         this.els.tableContainer.classList.remove('hidden');
     },
 
-    // Menyalin isi input ke AppState saat sebelum disave
     saveCurrentInputsToState() {
         const inputs = document.querySelectorAll('#table-body textarea');
         inputs.forEach(input => {
@@ -48,11 +51,10 @@ const UIManager = {
         });
     },
 
-    // Mengganti tampilan visual dari tombol Save
     setSaveBtnState(state) {
         const btn = this.els.saveBtn;
         if (state === 'loading') {
-            btn.innerHTML = `<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Menyimpan...`;
+            btn.innerHTML = `<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle></svg> Menyimpan...`;
             btn.disabled = true;
             btn.className = "bg-gray-400 text-white font-medium py-1.5 px-3 rounded text-[13px] flex items-center shadow-sm cursor-not-allowed";
         } else if (state === 'no-change') {
@@ -71,7 +73,6 @@ const UIManager = {
         }
     },
 
-    // Perbarui dropdown filter berdasarkan data unik yang ada
     updateDateSelectors() {
         this.els.filterStart.innerHTML = '';
         this.els.filterEnd.innerHTML = '';
@@ -89,12 +90,15 @@ const UIManager = {
         });
     },
 
-    // Membangun tabel HTML secara dinamis (Mapping Data ke Matrix)
     renderTable() {
         this.els.thead.innerHTML = '';
         this.els.tbody.innerHTML = '';
 
-        // 1. Header (Kiri & Tanggal)
+        if (AppState.uniqueRowGroups.length === 0) {
+            this.els.tbody.innerHTML = `<tr><td colspan="100%" class="p-6 text-center text-gray-500">Belum ada data untuk ${AppState.currentNameFilter}.</td></tr>`;
+            return;
+        }
+
         let thCompany = document.createElement('th');
         thCompany.className = "bg-[#f7f7f7] dark:bg-gristDarkPanel text-[#929299] dark:text-gristDarkMuted text-[11px] uppercase tracking-wider font-semibold border border-[#d9d9d9] dark:border-gristDarkBorder p-3 text-left min-w-[250px] z-30 sticky left-0";
         thCompany.innerText = "Company Name";
@@ -105,7 +109,6 @@ const UIManager = {
         thSKU.innerText = "SKU / Grade";
         this.els.thead.appendChild(thSKU);
 
-        // Ubah pembacaan uniqueDates menjadi filteredDates untuk kolom
         AppState.filteredDates.forEach(date => {
             let th = document.createElement('th');
             th.className = "bg-[#f7f7f7] dark:bg-gristDarkPanel text-[#929299] dark:text-gristDarkMuted text-[11px] uppercase tracking-wider font-semibold border border-[#d9d9d9] dark:border-gristDarkBorder p-3 text-left min-w-[320px]";
@@ -113,7 +116,6 @@ const UIManager = {
             this.els.thead.appendChild(th);
         });
 
-        // 2. Baris Data (Rows)
         AppState.uniqueRowGroups.forEach(group => {
             let tr = document.createElement('tr');
 
@@ -127,12 +129,12 @@ const UIManager = {
             tdSKU.innerText = group.sku || '-';
             tr.appendChild(tdSKU);
 
-            // 3. Kolom Isian Berdasarkan Tanggal (Hanya yang lolos filter)
             AppState.filteredDates.forEach(date => {
                 let td = document.createElement('td');
                 td.className = "p-0 relative border border-[#d9d9d9] dark:border-gristDarkBorder bg-white dark:bg-gristDarkBg align-top";
 
-                let matched = AppState.allRecords.find(r => r[Config.colCompany] === group.company && r[Config.colSKU] === group.sku && r[Config.colDate] === date);
+                // Gunakan AppState.filteredRecords agar pencarian lebih cepat (sudah disaring sesuai nama)
+                let matched = AppState.filteredRecords.find(r => r[Config.colCompany] === group.company && r[Config.colSKU] === group.sku && r[Config.colDate] === date);
                 let val = matched && matched[Config.colDesc] !== null ? matched[Config.colDesc] : '';
                 let recordId = matched ? matched.id : '';
 
@@ -148,7 +150,6 @@ const UIManager = {
                 input.dataset.company = group.company;
                 input.dataset.sku = group.sku;
 
-                // Bind listener agar teks menyesuaikan ketinggian & merekam di cache
                 input.addEventListener('input', function () {
                     Utils.autoResizeTextarea(this);
                     AppState.unsavedEdits[`${this.dataset.company}|${this.dataset.sku}|${this.dataset.date}`] = this.value;

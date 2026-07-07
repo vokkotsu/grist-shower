@@ -10,7 +10,6 @@
     <!-- Memuat Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        // Konfigurasi Tailwind untuk Dark Mode
         tailwind.config = {
             darkMode: 'class',
             theme: {
@@ -67,7 +66,6 @@
             background: #66667a;
         }
 
-        /* Fitur konten textarea dinamis (Browser Modern) */
         textarea {
             field-sizing: content;
         }
@@ -83,19 +81,19 @@
             class="border-b border-[#d9d9d9] dark:border-gristDarkBorder py-2.5 px-4 flex justify-between items-center bg-white dark:bg-gristDarkBg z-10 flex-wrap gap-4 transition-colors duration-200">
             <div>
                 <h2 class="text-[15px] font-semibold text-[#262633] dark:text-gristDarkText">Project Update Tracker</h2>
-                <p class="text-[11px] text-[#929299] dark:text-gristDarkMuted mt-0.5">Edit progress/deskripsi secara
-                    berkala. Sel otomatis menyesuaikan panjang teks.</p>
+                <p class="text-[11px] text-[#929299] dark:text-gristDarkMuted mt-0.5">Edit progress berdasarkan
+                    penanggung jawab (Nama).</p>
             </div>
 
             <div class="flex gap-2 items-center">
-                <!-- Dropdown Pilih Tabel -->
+                <!-- Dropdown Pilih Nama (Pengganti Pilih Tabel) -->
                 <div class="flex gap-1 items-center mr-2 border-r pr-4 border-gray-200 dark:border-gray-700">
-                    <span class="text-[12px] text-gray-500 dark:text-gray-400">Tabel:</span>
-                    <select id="table-selector"
+                    <span class="text-[12px] text-gray-500 dark:text-gray-400">Nama:</span>
+                    <select id="name-selector"
                         class="bg-transparent text-[12px] font-medium border border-gray-300 dark:border-gray-600 rounded p-1 focus:outline-none dark:text-white cursor-pointer"></select>
                 </div>
 
-                <!-- Dropdown Filter -->
+                <!-- Dropdown Filter Tanggal -->
                 <div class="flex gap-1 items-center mr-2 border-r pr-4 border-gray-200 dark:border-gray-700">
                     <span class="text-[12px] text-gray-500 dark:text-gray-400">Periode:</span>
                     <select id="filter-start"
@@ -151,40 +149,6 @@
         </div>
     </div>
 
-    <!-- Modal Dialog UI untuk Error Grist API -->
-    <div id="error-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-        <div
-            class="bg-white dark:bg-gristDarkPanel rounded-lg shadow-xl max-w-lg w-full p-6 text-left border border-red-200 dark:border-red-900">
-            <h3 class="text-lg font-bold text-red-600 dark:text-red-400 mb-2 flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-                Gagal Menyimpan Data
-            </h3>
-            <p class="text-sm text-gray-700 dark:text-gray-300 mb-4">Grist API menolak aksi simpan. Berikut adalah pesan
-                error dari database:</p>
-            <div class="bg-gray-100 dark:bg-gray-900 p-3 rounded text-xs font-mono text-red-600 dark:text-red-400 mb-4 whitespace-pre-wrap break-words border border-gray-200 dark:border-gray-700"
-                id="error-modal-msg"></div>
-            <div class="text-sm text-gray-600 dark:text-gray-400 space-y-2 mb-6">
-                <p><strong>Cek 3 hal ini di tabel Grist Anda:</strong></p>
-                <ol class="list-decimal pl-5 space-y-1">
-                    <li>Apakah <code>tableId</code> di <code>config.js</code> sesuai dengan ID asli tabel?</li>
-                    <li>Pastikan kolom <code>Company_Name</code>, <code>SKU_Grade</code>, atau <code>Date</code>
-                        berjenis <strong>Text / Choice</strong>.</li>
-                    <li>Pastikan Anda sudah mengklik <strong>Accept (Terima Akses Penuh)</strong> di pita kuning widget.
-                    </li>
-                </ol>
-            </div>
-            <div class="flex justify-end">
-                <button onclick="document.getElementById('error-modal').classList.add('hidden')"
-                    class="bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-white px-4 py-2 rounded text-sm font-medium transition">Tutup</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modul JavaScript Eksternal (Urutan Eksekusi Harus Sesuai) -->
     <script src="config.js"></script>
     <script src="utils.js"></script>
     <script src="ui.js"></script>

@@ -1,18 +1,18 @@
 // config.js
-// Berisi pengaturan referensi nama tabel dan kolom, serta state/memori internal aplikasi.
 const Config = {
-    // Daftar tabel akan diisi otomatis dari hasil scan database Grist
-    tables: [],
-    currentTableId: 'Journey',  // Tabel default saat widget pertama dimuat
-
-    colCompany: 'Company_Name', // ID Kolom Nama Perusahaan
-    colSKU: 'SKU_Grade',        // ID Kolom SKU / Grade
-    colDate: 'Date',            // ID Kolom Tanggal/Bulan
-    colDesc: 'Deskripsi'        // ID Kolom Catatan/Progress
+    tableId: 'Journey',         // Menggunakan tabel tunggal "Journey"
+    colName: 'Nama',            // Kolom untuk membedakan data per dropdown
+    colCompany: 'Company_Name',
+    colSKU: 'SKU_Grade',
+    colDate: 'Date',
+    colDesc: 'Deskripsi'
 };
 
 const AppState = {
     allRecords: [],
+    filteredRecords: [],   // Data yang sudah disaring berdasarkan Nama yang dipilih
+    uniqueNames: [],       // Daftar nama-nama orang yang tersedia di database
+    currentNameFilter: '', // Menyimpan nama yang sedang aktif di layar
     uniqueDates: [],
     filteredDates: [],
     uniqueRowGroups: [],

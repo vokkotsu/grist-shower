@@ -1,5 +1,4 @@
 // logic.js
-// Melakukan validasi data, mempersiapkan format array, dan menghasilkan susunan Payload Grist
 const BusinessLogic = {
     processIncomingRecords(records) {
         if (!records || records.length === 0) {
@@ -8,28 +7,46 @@ const BusinessLogic = {
         }
 
         const sample = records[0];
-        if (!(Config.colCompany in sample) || !(Config.colSKU in sample) || !(Config.colDate in sample) || !(Config.colDesc in sample)) {
+        // Memeriksa keberadaan kolom baru (Config.colName)
+        if (!(Config.colCompany in sample) || !(Config.colSKU in sample) || !(Config.colDate in sample) || !(Config.colDesc in sample) || !(Config.colName in sample)) {
             let cols = Object.keys(sample).filter(k => k !== 'id').join(', ');
-            UIManager.showError(`<b>Error Kolom:</b> Pastikan ID Kolom di Grist persis sama: ${Config.colCompany}, ${Config.colSKU}, ${Config.colDate}, ${Config.colDesc}. <br><br>Tersedia saat ini: ${cols}`);
+            UIManager.showError(`<b>Error Kolom:</b> Pastikan ID Kolom: <b>${Config.colName}</b>, ${Config.colCompany}, ${Config.colSKU}, ${Config.colDate}, ${Config.colDesc} tersedia di tabel. <br><br>Tersedia saat ini: ${cols}`);
             return;
         }
 
         AppState.allRecords = records;
 
-        // 1. Ekstrak tanggal unik lalu urutkan
-        let rawDates = [...new Set(records.map(r => r[Config.colDate]))].filter(Boolean);
+        // 1. Ekstrak nama unik untuk mengisi dropdown
+        let rawNames = [...new Set(records.map(r => r[Config.colName]))].filter(Boolean);
+        AppState.uniqueNames = rawNames.sort();
+
+        // 2. Tentukan nama yang aktif secara default jika kosong
+        if (!AppState.currentNameFilter || !AppState.uniqueNames.includes(AppState.currentNameFilter)) {
+            AppState.currentNameFilter = AppState.uniqueNames[0] || '';
+        }
+
+        UIManager.initNameSelector();
+        this.applyFiltersAndRender();
+    },
+
+    applyFiltersAndRender() {
+        // 3. Saring data khusus untuk nama yang dipilih
+        AppState.filteredRecords = AppState.allRecords.filter(r => r[Config.colName] === AppState.currentNameFilter);
+
+        // 4. Ekstrak tanggal HANYA dari data milik nama terpilih
+        let rawDates = [...new Set(AppState.filteredRecords.map(r => r[Config.colDate]))].filter(Boolean);
         AppState.uniqueDates = Utils.sortDates(rawDates);
 
-        // 2. Kumpulkan grup unik (Kombinasi Company & SKU) menggunakan Map
+        // 5. Kumpulkan grup (Company & SKU) HANYA untuk nama terpilih
         const groupMap = new Map();
-        records.forEach(r => {
+        AppState.filteredRecords.forEach(r => {
             const c = r[Config.colCompany] || '';
             const s = r[Config.colSKU] || '';
             if (c || s) groupMap.set(`${c}|${s}`, { company: c, sku: s });
         });
         AppState.uniqueRowGroups = Array.from(groupMap.values());
 
-        // Atur default nilai filter (Tampilkan semua secara default)
+        // Atur default nilai filter Tanggal jika belum diset atau sudah tidak valid
         if (!AppState.filterStartVal || !AppState.uniqueDates.includes(AppState.filterStartVal)) {
             AppState.filterStartVal = AppState.uniqueDates[0];
         }
@@ -37,10 +54,8 @@ const BusinessLogic = {
             AppState.filterEndVal = AppState.uniqueDates[AppState.uniqueDates.length - 1];
         }
 
-        // Terapkan saringan rentang waktu sebelum dirender
         this.applyDateFilter();
 
-        // Render UI
         UIManager.updateDateSelectors();
         UIManager.showTable();
         UIManager.renderTable();
@@ -50,13 +65,11 @@ const BusinessLogic = {
         const startNum = Utils.parseDateToNumber(AppState.filterStartVal);
         const endNum = Utils.parseDateToNumber(AppState.filterEndVal);
 
-        // Pencegahan error jika pengguna memilih Tanggal Awal > Tanggal Akhir
         if (startNum > endNum) {
             AppState.filterEndVal = AppState.filterStartVal;
-            UIManager.updateDateSelectors(); // Paksa dropdown mereset ke angka valid
+            UIManager.updateDateSelectors();
         }
 
-        // Simpan hanya bulan-bulan yang berada di dalam rentang filter
         AppState.filteredDates = AppState.uniqueDates.filter(d => {
             const num = Utils.parseDateToNumber(d);
             return num >= Utils.parseDateToNumber(AppState.filterStartVal) && num <= Utils.parseDateToNumber(AppState.filterEndVal);
@@ -64,12 +77,11 @@ const BusinessLogic = {
     },
 
     generateSavePayload() {
-        UIManager.saveCurrentInputsToState(); // Simpan yang belum sempat tercatat oleh listener
+        UIManager.saveCurrentInputsToState();
 
         const apiActions = [];
         const inputs = document.querySelectorAll('#table-body textarea');
 
-        // Bentuk Payload Update / Add berdasar ketersediaan ID Data
         inputs.forEach(input => {
             const id = parseInt(input.dataset.id);
             const val = input.value.trim();
@@ -77,12 +89,12 @@ const BusinessLogic = {
             if (id) {
                 const original = AppState.allRecords.find(r => r.id === id);
                 if (original && String(original[Config.colDesc] || '').trim() !== val) {
-                    // MENGGUNAKAN Config.currentTableId
-                    apiActions.push(['UpdateRecord', Config.currentTableId, id, { [Config.colDesc]: val }]);
+                    apiActions.push(['UpdateRecord', Config.tableId, id, { [Config.colDesc]: val }]);
                 }
             } else if (val !== '') {
-                // MENGGUNAKAN Config.currentTableId
-                apiActions.push(['AddRecord', Config.currentTableId, null, {
+                // SANGAT PENTING: Sisipkan nama saat membuat record/baris baru
+                apiActions.push(['AddRecord', Config.tableId, null, {
+                    [Config.colName]: AppState.currentNameFilter,
                     [Config.colDate]: input.dataset.date,
                     [Config.colCompany]: input.dataset.company,
                     [Config.colSKU]: input.dataset.sku,
