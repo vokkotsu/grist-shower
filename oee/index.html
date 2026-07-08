@@ -93,8 +93,8 @@
             class="border-b border-[#d9d9d9] dark:border-gristDarkBorder py-2.5 px-4 flex justify-between items-center bg-white dark:bg-gristDarkBg z-30 flex-wrap gap-4 transition-colors duration-200">
             <div>
                 <h2 class="text-[15px] font-semibold text-[#262633] dark:text-gristDarkText">OEE Metrics Tracker</h2>
-                <p class="text-[11px] text-[#929299] dark:text-gristDarkMuted mt-0.5">Edit metrik secara horizontal.
-                    Kolom Periode & Source dibekukan (Sticky).</p>
+                <p class="text-[11px] text-[#929299] dark:text-gristDarkMuted mt-0.5">Edit seluruh sel termasuk Periode
+                    & Source. Kolom beku (Sticky).</p>
             </div>
 
             <div class="flex gap-2 items-center">
@@ -111,6 +111,14 @@
                         xmlns="http://www.w3.org/2000/svg">
                         <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
                     </svg>
+                </button>
+                <button type="button" id="add-row-btn"
+                    class="bg-white dark:bg-gristDarkBg border border-[#d9d9d9] dark:border-gristDarkBorder text-[#262633] dark:text-gristDarkText hover:bg-[#f7f7f7] dark:hover:bg-gristDarkPanel font-medium py-1.5 px-3 rounded text-[13px] transition duration-150 flex items-center gap-1.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-[#929299] dark:text-gristDarkMuted"
+                        fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Tambah Baris
                 </button>
                 <button type="button" id="save-btn"
                     class="bg-[#16b378] hover:bg-[#139a67] text-white font-medium py-1.5 px-3 rounded text-[13px] transition duration-150 flex items-center gap-1.5 shadow-sm">
@@ -183,7 +191,8 @@
 
         const AppState = {
             allRecords: [],
-            unsavedEdits: {} // format key: "recordId|metricId"
+            unsavedEdits: {}, // format key: "recordId|metricId" (atau colPeriode/colSource)
+            newRecordCounter: 1 // Counter unik untuk baris yang belum masuk ke database
         };
 
         // ==========================================
@@ -209,6 +218,33 @@
             },
             _formatShort(dateObj) {
                 return this.monthNamesShort[dateObj.getUTCMonth()] + ' ' + String(dateObj.getUTCFullYear()).slice(-2);
+            },
+            toGristString(uiStr) {
+                if (!uiStr) return null;
+                let str = String(uiStr).trim();
+
+                // Jika user mengetik YYYY-MM-DD
+                if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
+                // Jika user mengetik YYYY-MM
+                if (/^\d{4}-\d{2}$/.test(str)) return `${str}-01`;
+
+                // Jika user mengetik format 'Jan 24'
+                let parts = str.split(/[\s-]/);
+                if (parts.length >= 2) {
+                    let mIndex = this.monthNamesShort.findIndex(m => m.toLowerCase() === parts[0].toLowerCase());
+                    if (mIndex !== -1) {
+                        let y = parts[parts.length - 1];
+                        if (y.length === 2) y = "20" + y;
+                        let m = String(mIndex + 1).padStart(2, '0');
+                        return `${y}-${m}-01`;
+                    }
+                }
+
+                // Fallback Date parser
+                let d = new Date(str);
+                if (!isNaN(d.getTime())) return d.toISOString().split('T')[0];
+
+                return str;
             }
         };
 
@@ -229,7 +265,8 @@
                 errorBox: document.getElementById('error-box'),
                 thead: document.getElementById('table-head'),
                 tbody: document.getElementById('table-body'),
-                saveBtn: document.getElementById('save-btn')
+                saveBtn: document.getElementById('save-btn'),
+                addRowBtn: document.getElementById('add-row-btn')
             },
 
             showError(msg) {
@@ -263,13 +300,13 @@
                 // --- HEADER ---
                 // 1. Kolom Periode (Sticky 1)
                 let thPeriode = document.createElement('th');
-                thPeriode.className = "bg-[#f7f7f7] dark:bg-gristDarkPanel text-[#929299] dark:text-gristDarkMuted text-[11px] uppercase tracking-wider font-semibold border border-[#d9d9d9] dark:border-gristDarkBorder p-2 text-center min-w-[100px] sticky left-0 z-30 transition-colors duration-200";
+                thPeriode.className = "bg-[#f7f7f7] dark:bg-gristDarkPanel text-[#929299] dark:text-gristDarkMuted text-[11px] uppercase tracking-wider font-semibold border border-[#d9d9d9] dark:border-gristDarkBorder p-2 text-center min-w-[120px] sticky left-0 z-30 transition-colors duration-200";
                 thPeriode.innerText = "Periode";
                 this.els.thead.appendChild(thPeriode);
 
-                // 2. Kolom Source (Sticky 2 dengan bayangan pembatas)
+                // 2. Kolom Source (Sticky 2)
                 let thSource = document.createElement('th');
-                thSource.className = "bg-[#f7f7f7] dark:bg-gristDarkPanel text-[#929299] dark:text-gristDarkMuted text-[11px] uppercase tracking-wider font-semibold border border-[#d9d9d9] dark:border-gristDarkBorder p-2 text-left min-w-[150px] sticky left-[100px] sticky-shadow z-30 transition-colors duration-200";
+                thSource.className = "bg-[#f7f7f7] dark:bg-gristDarkPanel text-[#929299] dark:text-gristDarkMuted text-[11px] uppercase tracking-wider font-semibold border border-[#d9d9d9] dark:border-gristDarkBorder p-2 text-left min-w-[160px] sticky left-[120px] sticky-shadow z-30 transition-colors duration-200";
                 thSource.innerText = "Source";
                 this.els.thead.appendChild(thSource);
 
@@ -285,7 +322,7 @@
                 // --- BODY ---
                 if (AppState.allRecords.length === 0) {
                     let tr = document.createElement('tr');
-                    tr.innerHTML = `<td colspan="${2 + Config.metricColumns.length}" class="p-4 text-center text-gray-500">Belum ada data. Tambahkan baris di Grist terlebih dahulu.</td>`;
+                    tr.innerHTML = `<td colspan="${2 + Config.metricColumns.length}" class="p-4 text-center text-gray-500">Belum ada data. Silakan klik 'Tambah Baris'.</td>`;
                     this.els.tbody.appendChild(tr);
                     return;
                 }
@@ -293,17 +330,50 @@
                 AppState.allRecords.forEach(record => {
                     let tr = document.createElement('tr');
                     tr.className = "hover:bg-blue-50/20 dark:hover:bg-white/5 transition-colors duration-150";
+                    const isNewRow = String(record.id).startsWith('new_');
 
-                    // 1. Cell Periode (Sticky)
+                    // 1. Cell Periode (Editable Sticky)
                     let tdPeriode = document.createElement('td');
-                    tdPeriode.className = "bg-white dark:bg-gristDarkBg text-[#262633] dark:text-gristDarkText text-[13px] font-medium border border-[#d9d9d9] dark:border-gristDarkBorder p-2 text-center sticky left-0 z-20";
-                    tdPeriode.innerText = DateUtil.parse(record[Config.colPeriode]);
+                    tdPeriode.className = "p-0 relative bg-white dark:bg-gristDarkBg border border-[#d9d9d9] dark:border-gristDarkBorder sticky left-0 z-20 transition-colors duration-200";
+
+                    const keyPeriode = `${record.id}|${Config.colPeriode}`;
+                    let dbPeriode = DateUtil.parse(record[Config.colPeriode]) || '';
+                    let valPeriode = AppState.unsavedEdits[keyPeriode] !== undefined ? AppState.unsavedEdits[keyPeriode] : dbPeriode;
+
+                    let inputPeriode = document.createElement('input');
+                    inputPeriode.type = 'text';
+                    inputPeriode.placeholder = 'Misal: Mei 24';
+                    inputPeriode.className = "w-full h-full min-h-[36px] px-2 absolute inset-0 text-center text-[13px] text-[#262633] dark:text-gristDarkText font-medium bg-transparent focus:outline-none focus:ring-0 focus:shadow-[inset_0_0_0_2px_#1f78d1] focus:bg-blue-50/30 dark:focus:bg-[#1f78d1]/20 focus:z-10 transition-none";
+                    if (isNewRow && !valPeriode) inputPeriode.classList.add('bg-yellow-50', 'dark:bg-yellow-900/20');
+                    inputPeriode.value = valPeriode;
+
+                    inputPeriode.addEventListener('input', (e) => {
+                        AppState.unsavedEdits[keyPeriode] = e.target.value;
+                        if (e.target.value) inputPeriode.classList.remove('bg-yellow-50', 'dark:bg-yellow-900/20');
+                    });
+                    tdPeriode.appendChild(inputPeriode);
                     tr.appendChild(tdPeriode);
 
-                    // 2. Cell Source (Sticky)
+                    // 2. Cell Source (Editable Sticky)
                     let tdSource = document.createElement('td');
-                    tdSource.className = "bg-white dark:bg-gristDarkBg text-[#262633] dark:text-gristDarkText text-[13px] font-medium border border-[#d9d9d9] dark:border-gristDarkBorder p-2 text-left sticky left-[100px] sticky-shadow z-20 whitespace-normal";
-                    tdSource.innerText = ValUtil.getChoiceVal(record[Config.colSource]) || '-';
+                    tdSource.className = "p-0 relative bg-white dark:bg-gristDarkBg border border-[#d9d9d9] dark:border-gristDarkBorder sticky left-[120px] sticky-shadow z-20 transition-colors duration-200";
+
+                    const keySource = `${record.id}|${Config.colSource}`;
+                    let dbSource = ValUtil.getChoiceVal(record[Config.colSource]) || '';
+                    let valSource = AppState.unsavedEdits[keySource] !== undefined ? AppState.unsavedEdits[keySource] : dbSource;
+
+                    let inputSource = document.createElement('input');
+                    inputSource.type = 'text';
+                    inputSource.placeholder = 'Nama Mesin/Source';
+                    inputSource.className = "w-full h-full min-h-[36px] px-2 absolute inset-0 text-left text-[13px] text-[#262633] dark:text-gristDarkText font-medium bg-transparent focus:outline-none focus:ring-0 focus:shadow-[inset_0_0_0_2px_#1f78d1] focus:bg-blue-50/30 dark:focus:bg-[#1f78d1]/20 focus:z-10 transition-none";
+                    if (isNewRow && !valSource) inputSource.classList.add('bg-yellow-50', 'dark:bg-yellow-900/20');
+                    inputSource.value = valSource;
+
+                    inputSource.addEventListener('input', (e) => {
+                        AppState.unsavedEdits[keySource] = e.target.value;
+                        if (e.target.value) inputSource.classList.remove('bg-yellow-50', 'dark:bg-yellow-900/20');
+                    });
+                    tdSource.appendChild(inputSource);
                     tr.appendChild(tdSource);
 
                     // 3. Cells Metrik Dinamis (Input Type Number)
@@ -352,7 +422,7 @@
                 const sample = records[0];
                 const availableCols = Object.keys(sample);
 
-                // FUNGSI BARU: Deteksi Kolom Otomatis (Mengabaikan huruf besar/kecil)
+                // Deteksi Kolom Otomatis (Mengabaikan huruf besar/kecil)
                 const getActualCol = (confCol) => availableCols.find(c => c.toLowerCase() === confCol.toLowerCase()) || confCol;
 
                 Config.colPeriode = getActualCol(Config.colPeriode);
@@ -368,30 +438,68 @@
                     return;
                 }
 
-                // Menyimpan semua record persis seperti yang dikirim Grist
                 AppState.allRecords = records;
                 UIManager.renderTable();
             },
 
+            // Menambahkan baris kosong ke memori UI
+            addNewRow() {
+                const newRecord = {
+                    id: `new_${AppState.newRecordCounter++}`,
+                    [Config.colPeriode]: '',
+                    [Config.colSource]: ''
+                };
+
+                // Tambahkan metrik default
+                Config.metricColumns.forEach(m => {
+                    newRecord[m.id] = null;
+                });
+
+                AppState.allRecords.push(newRecord);
+                UIManager.renderTable();
+
+                // Scroll table ke baris paling bawah secara otomatis
+                const container = UIManager.els.tableContainer;
+                container.scrollTop = container.scrollHeight;
+            },
+
             generateSavePayload() {
-                // Grouping berdasarkan Row ID
                 const groupedUpdates = {};
 
+                // Grouping berdasarkan Row ID
                 for (let key in AppState.unsavedEdits) {
-                    const [recordId, metricId] = key.split('|');
+                    const [recordId, fieldId] = key.split('|');
                     const rawVal = AppState.unsavedEdits[key];
-                    const numVal = rawVal === '' ? null : Number(rawVal); // Izinkan hapus nilai
 
                     if (!groupedUpdates[recordId]) {
                         groupedUpdates[recordId] = {};
                     }
-                    groupedUpdates[recordId][metricId] = numVal;
+
+                    // Casting tipe data
+                    if (fieldId === Config.colPeriode || fieldId === Config.colSource) {
+                        groupedUpdates[recordId][fieldId] = rawVal; // Pertahankan sebagai String
+                    } else {
+                        groupedUpdates[recordId][fieldId] = rawVal === '' ? null : Number(rawVal); // Casting ke Number
+                    }
                 }
 
                 // Terjemahkan ke API Actions
                 const apiActions = [];
                 for (let recordId in groupedUpdates) {
-                    apiActions.push(['UpdateRecord', Config.tableId, parseInt(recordId, 10), groupedUpdates[recordId]]);
+                    const changes = groupedUpdates[recordId];
+
+                    // Konversi string periode (Bulan YY) menjadi format Date (YYYY-MM-DD) yang disukai Grist
+                    if (changes[Config.colPeriode] !== undefined) {
+                        changes[Config.colPeriode] = DateUtil.toGristString(changes[Config.colPeriode]);
+                    }
+
+                    // Tentukan AddRecord atau UpdateRecord
+                    if (String(recordId).startsWith('new_')) {
+                        // Pastikan jika ada row baru tapi tidak diisi source/periode, tidak dikirim (atau kirim null/string kosong)
+                        apiActions.push(['AddRecord', Config.tableId, null, changes]);
+                    } else {
+                        apiActions.push(['UpdateRecord', Config.tableId, parseInt(recordId, 10), changes]);
+                    }
                 }
 
                 return apiActions;
@@ -425,6 +533,11 @@
 
             grist.onRecords(records => {
                 BusinessLogic.processIncomingRecords(records);
+            });
+
+            // Event Tambah Baris
+            UIManager.els.addRowBtn.addEventListener('click', () => {
+                BusinessLogic.addNewRow();
             });
 
             // Event Simpan
