@@ -349,10 +349,22 @@
                     return;
                 }
 
-                // Cek kolom wajib (Sampling)
                 const sample = records[0];
+                const availableCols = Object.keys(sample);
+
+                // FUNGSI BARU: Deteksi Kolom Otomatis (Mengabaikan huruf besar/kecil)
+                const getActualCol = (confCol) => availableCols.find(c => c.toLowerCase() === confCol.toLowerCase()) || confCol;
+
+                Config.colPeriode = getActualCol(Config.colPeriode);
+                Config.colSource = getActualCol(Config.colSource);
+                Config.metricColumns.forEach(m => {
+                    m.id = getActualCol(m.id);
+                });
+
+                // Cek kolom wajib exist (setelah di-mapping ulang)
                 if (!(Config.colPeriode in sample) || !(Config.colSource in sample)) {
-                    UIManager.showError(`<b>Error Kolom:</b> Kolom '${Config.colPeriode}' atau '${Config.colSource}' tidak ditemukan di tabel Grist Anda.`);
+                    let colsList = availableCols.filter(k => k !== 'id').join(', ');
+                    UIManager.showError(`<b>Error Kolom:</b> Kolom '${Config.colPeriode}' atau '${Config.colSource}' tidak ditemukan di tabel Grist Anda.<br><br><b>Kolom yang terdeteksi di tabel:</b><br><span class="font-mono text-xs text-blue-600 bg-blue-50 p-2 rounded block mt-2 break-words leading-relaxed">${colsList}</span><br>Pastikan Anda memilih tabel yang benar pada Creator Panel Grist (Kanan).`);
                     return;
                 }
 
