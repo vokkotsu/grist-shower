@@ -5,9 +5,8 @@ const Config = {
 
     // Daftar lengkap kolom numerik OEE secara berurutan (Kiri ke Kanan)
     metricColumns: [
-        { id: 'rm_powder', label: 'Quantity RM Powder (KG)', width: '90px' },
-        { id: 'rm_oli', label: 'Quantity RM Oil (KG)', width: '90px' },
-        { id: 'rm_glucose', label: 'Quantity RM Glucose (KG)', width: '90px' }
+        { id: 'rfq', label: 'RFQ (KG)', width: '90px' },
+        { id: 'rft', label: 'RFT (KG)', width: '90px' }
     ]
 };
 
