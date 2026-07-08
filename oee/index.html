@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OEE Metrics Dashboard (Flat)</title>
+    <!-- Memuat Grist API -->
+    <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+    <!-- Memuat Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        gristDarkBg: '#262633',
+                        gristDarkPanel: '#2b2b36',
+                        gristDarkBorder: '#3e3e4a',
+                        gristDarkText: '#EFEFEF',
+                        gristDarkMuted: '#A4A4A4',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        ::-webkit-scrollbar {
+            height: 10px;
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f7f7f7;
+            border-left: 1px solid #d9d9d9;
+            border-top: 1px solid #d9d9d9;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cccccc;
+            border: 2px solid #f7f7f7;
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a6a6a6;
+        }
+
+        .dark ::-webkit-scrollbar-track {
+            background: #262633;
+            border-color: #3e3e4a;
+            border-top: none;
+        }
+
+        .dark ::-webkit-scrollbar-thumb {
+            background: #4b4b5a;
+            border: 2px solid #262633;
+        }
+
+        .dark ::-webkit-scrollbar-thumb:hover {
+            background: #66667a;
+        }
+
+        /* Sembunyikan panah input agar rapi */
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        /* Efek bayangan untuk kolom sticky */
+        .sticky-shadow {
+            box-shadow: 4px 0 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        .dark .sticky-shadow {
+            box-shadow: 4px 0 6px -2px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+
+<body
+    class="bg-white dark:bg-gristDarkBg m-0 p-0 h-screen flex flex-col text-[#262633] dark:text-gristDarkText transition-colors duration-200">
+    <div class="w-full bg-white dark:bg-gristDarkBg flex flex-col h-full transition-colors duration-200">
+
+        <!-- Header & Navigasi -->
+        <div
+            class="border-b border-[#d9d9d9] dark:border-gristDarkBorder py-2.5 px-4 flex justify-between items-center bg-white dark:bg-gristDarkBg z-30 flex-wrap gap-4 transition-colors duration-200">
+            <div>
+                <h2 class="text-[15px] font-semibold text-[#262633] dark:text-gristDarkText">OEE Metrics Tracker</h2>
+                <p class="text-[11px] text-[#929299] dark:text-gristDarkMuted mt-0.5">Edit metrik secara horizontal.
+                    Kolom Periode & Source dibekukan (Sticky).</p>
+            </div>
+
+            <div class="flex gap-2 items-center">
+                <button type="button" id="theme-toggle"
+                    class="text-[#929299] dark:text-gristDarkMuted hover:bg-[#f7f7f7] dark:hover:bg-gristDarkPanel hover:text-[#262633] dark:hover:text-gristDarkText p-1.5 rounded transition duration-150 mr-2"
+                    title="Ganti Tema">
+                    <svg id="theme-toggle-light-icon" class="hidden w-4 h-4" fill="currentColor" viewBox="0 0 20 20"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z">
+                        </path>
+                    </svg>
+                    <svg id="theme-toggle-dark-icon" class="hidden w-4 h-4" fill="currentColor" viewBox="0 0 20 20"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+                    </svg>
+                </button>
+                <button type="button" id="save-btn"
+                    class="bg-[#16b378] hover:bg-[#139a67] text-white font-medium py-1.5 px-3 rounded text-[13px] transition duration-150 flex items-center gap-1.5 shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    Simpan Perubahan
+                </button>
+            </div>
+        </div>
+
+        <!-- Status Panel -->
+        <div id="loading-panel"
+            class="flex-grow flex flex-col items-center justify-center text-center p-6 text-gray-500 dark:text-gristDarkMuted transition-colors duration-200">
+            <p id="loading-text" class="text-[13px] font-medium">Memproses data dari Grist...</p>
+            <div id="error-box"
+                class="hidden mt-4 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 p-4 rounded border border-red-200 dark:border-red-800 text-left max-w-lg text-[13px]">
+            </div>
+        </div>
+
+        <!-- Table Data Grid (Flat) -->
+        <div id="table-container"
+            class="hidden flex-grow overflow-auto p-0 relative bg-[#f7f7f7] dark:bg-[#1e1e24] transition-colors duration-200">
+            <table
+                class="w-max border-collapse text-sm whitespace-nowrap bg-white dark:bg-gristDarkBg transition-colors duration-200">
+                <thead class="sticky top-0 z-20">
+                    <tr id="table-head"></tr>
+                </thead>
+                <tbody id="table-body"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // 1. CONFIGURATION
+        // ==========================================
+        const Config = {
+            tableId: 'Oee_metric__monthy',
+            colPeriode: 'periode',
+            colSource: 'source',
+
+            // Daftar lengkap kolom numerik OEE secara berurutan (Kiri ke Kanan)
+            metricColumns: [
+                { id: 'days_per_month', label: 'Days/Mo', width: '90px' },
+                { id: 'idle_time', label: 'Idle (Hrs)', width: '90px' },
+                { id: 'holiday', label: 'Holiday (Hrs)', width: '100px' },
+                { id: 'cip', label: 'CIP (Hrs)', width: '90px' },
+                { id: 'maintenance', label: 'Maint (Hrs)', width: '90px' },
+                { id: 'unplanned_down', label: 'Unplan Down', width: '100px' },
+                { id: 'production_time', label: 'Prod Time', width: '100px' },
+                { id: 'machine_capacity', label: 'Mach Cap', width: '100px' },
+                { id: 'budget_production', label: 'Budget Prod', width: '100px' },
+                { id: 'actual_production', label: 'Act Prod', width: '100px' },
+                { id: 'ndc_equivalent', label: 'NDC Equiv', width: '100px' },
+                { id: 'total_productivity', label: 'Total Prod', width: '100px' },
+                { id: 'correction', label: 'Correction', width: '90px' },
+                { id: 'block_stock', label: 'Block Stock', width: '100px' },
+                { id: 'reject', label: 'Reject', width: '90px' },
+                { id: 'effective_days', label: 'Eff Days', width: '90px' },
+                { id: 'available_time', label: 'Avail Time', width: '100px' },
+                { id: 'production_time_effective', label: 'Prod Time Eff', width: '110px' },
+                { id: 'time_available_rate', label: 'Time Avail %', width: '110px', isHighlight: true },
+                { id: 'performance_rate', label: 'Perform %', width: '100px', isHighlight: true },
+                { id: 'quality_rate', label: 'Quality %', width: '100px', isHighlight: true },
+                { id: 'oee', label: 'OEE %', width: '100px', isHighlight: true }
+            ]
+        };
+
+        const AppState = {
+            allRecords: [],
+            unsavedEdits: {} // format key: "recordId|metricId"
+        };
+
+        // ==========================================
+        // 2. UTILS
+        // ==========================================
+        const DateUtil = {
+            monthNamesShort: ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"],
+            parse(val) {
+                if (!val) return '';
+                try {
+                    if (Array.isArray(val) && val[0] === 'd' && typeof val[1] === 'number') {
+                        return this._formatShort(new Date(val[1] * 1000));
+                    }
+                    if (typeof val === 'number') {
+                        return this._formatShort(new Date(val > 100000000000 ? val : val * 1000));
+                    }
+                    if (typeof val === 'string') {
+                        let d = new Date(val);
+                        if (!isNaN(d.getTime())) return this._formatShort(d);
+                    }
+                } catch (e) { console.error(e); }
+                return String(val);
+            },
+            _formatShort(dateObj) {
+                return this.monthNamesShort[dateObj.getUTCMonth()] + ' ' + String(dateObj.getUTCFullYear()).slice(-2);
+            }
+        };
+
+        const ValUtil = {
+            getChoiceVal(val) {
+                if (Array.isArray(val) && val.length > 1) return String(val[1]);
+                return val;
+            }
+        };
+
+        // ==========================================
+        // 3. UI MANAGER (FLAT TABLE)
+        // ==========================================
+        const UIManager = {
+            els: {
+                loadingPanel: document.getElementById('loading-panel'),
+                tableContainer: document.getElementById('table-container'),
+                errorBox: document.getElementById('error-box'),
+                thead: document.getElementById('table-head'),
+                tbody: document.getElementById('table-body'),
+                saveBtn: document.getElementById('save-btn')
+            },
+
+            showError(msg) {
+                this.els.errorBox.innerHTML = msg;
+                this.els.errorBox.classList.remove('hidden');
+                this.els.loadingPanel.classList.remove('hidden');
+                this.els.tableContainer.classList.add('hidden');
+            },
+
+            setSaveBtnState(state) {
+                const btn = this.els.saveBtn;
+                if (state === 'loading') {
+                    btn.innerHTML = `<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle></svg> Menyimpan...`;
+                    btn.className = "bg-gray-400 text-white font-medium py-1.5 px-3 rounded text-[13px] flex items-center shadow-sm cursor-not-allowed pointer-events-none";
+                } else if (state === 'no-change') {
+                    btn.innerHTML = 'Tidak ada perubahan';
+                    btn.className = "bg-yellow-500 text-white font-medium py-1.5 px-3 rounded text-[13px] flex items-center shadow-sm pointer-events-none";
+                } else if (state === 'success') {
+                    btn.innerHTML = `<svg class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg> Tersimpan`;
+                    btn.className = "bg-[#16b378] text-white font-medium py-1.5 px-3 rounded text-[13px] flex items-center shadow-sm pointer-events-none";
+                } else {
+                    btn.innerHTML = `<svg class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg> Simpan Perubahan`;
+                    btn.className = "bg-[#16b378] hover:bg-[#139a67] text-white font-medium py-1.5 px-3 rounded text-[13px] transition duration-150 flex items-center shadow-sm";
+                }
+            },
+
+            renderTable() {
+                this.els.thead.innerHTML = '';
+                this.els.tbody.innerHTML = '';
+
+                // --- HEADER ---
+                // 1. Kolom Periode (Sticky 1)
+                let thPeriode = document.createElement('th');
+                thPeriode.className = "bg-[#f7f7f7] dark:bg-gristDarkPanel text-[#929299] dark:text-gristDarkMuted text-[11px] uppercase tracking-wider font-semibold border border-[#d9d9d9] dark:border-gristDarkBorder p-2 text-center min-w-[100px] sticky left-0 z-30 transition-colors duration-200";
+                thPeriode.innerText = "Periode";
+                this.els.thead.appendChild(thPeriode);
+
+                // 2. Kolom Source (Sticky 2 dengan bayangan pembatas)
+                let thSource = document.createElement('th');
+                thSource.className = "bg-[#f7f7f7] dark:bg-gristDarkPanel text-[#929299] dark:text-gristDarkMuted text-[11px] uppercase tracking-wider font-semibold border border-[#d9d9d9] dark:border-gristDarkBorder p-2 text-left min-w-[150px] sticky left-[100px] sticky-shadow z-30 transition-colors duration-200";
+                thSource.innerText = "Source";
+                this.els.thead.appendChild(thSource);
+
+                // 3. Header Metrik Dinamis
+                Config.metricColumns.forEach(metric => {
+                    let th = document.createElement('th');
+                    th.className = `bg-[#f7f7f7] dark:bg-gristDarkPanel text-[#929299] dark:text-gristDarkMuted text-[11px] uppercase tracking-wider font-semibold border border-[#d9d9d9] dark:border-gristDarkBorder p-2 text-right transition-colors duration-200 ${metric.isHighlight ? 'text-blue-600 dark:text-blue-400' : ''}`;
+                    th.style.minWidth = metric.width;
+                    th.innerText = metric.label;
+                    this.els.thead.appendChild(th);
+                });
+
+                // --- BODY ---
+                if (AppState.allRecords.length === 0) {
+                    let tr = document.createElement('tr');
+                    tr.innerHTML = `<td colspan="${2 + Config.metricColumns.length}" class="p-4 text-center text-gray-500">Belum ada data. Tambahkan baris di Grist terlebih dahulu.</td>`;
+                    this.els.tbody.appendChild(tr);
+                    return;
+                }
+
+                AppState.allRecords.forEach(record => {
+                    let tr = document.createElement('tr');
+                    tr.className = "hover:bg-blue-50/20 dark:hover:bg-white/5 transition-colors duration-150";
+
+                    // 1. Cell Periode (Sticky)
+                    let tdPeriode = document.createElement('td');
+                    tdPeriode.className = "bg-white dark:bg-gristDarkBg text-[#262633] dark:text-gristDarkText text-[13px] font-medium border border-[#d9d9d9] dark:border-gristDarkBorder p-2 text-center sticky left-0 z-20";
+                    tdPeriode.innerText = DateUtil.parse(record[Config.colPeriode]);
+                    tr.appendChild(tdPeriode);
+
+                    // 2. Cell Source (Sticky)
+                    let tdSource = document.createElement('td');
+                    tdSource.className = "bg-white dark:bg-gristDarkBg text-[#262633] dark:text-gristDarkText text-[13px] font-medium border border-[#d9d9d9] dark:border-gristDarkBorder p-2 text-left sticky left-[100px] sticky-shadow z-20 whitespace-normal";
+                    tdSource.innerText = ValUtil.getChoiceVal(record[Config.colSource]) || '-';
+                    tr.appendChild(tdSource);
+
+                    // 3. Cells Metrik Dinamis (Input Type Number)
+                    Config.metricColumns.forEach(metric => {
+                        let td = document.createElement('td');
+                        td.className = "p-0 relative h-full border border-[#d9d9d9] dark:border-gristDarkBorder bg-white dark:bg-gristDarkBg";
+
+                        let dbVal = record[metric.id] !== null && record[metric.id] !== undefined ? record[metric.id] : '';
+                        const editKey = `${record.id}|${metric.id}`;
+                        let finalVal = AppState.unsavedEdits[editKey] !== undefined ? AppState.unsavedEdits[editKey] : dbVal;
+
+                        let input = document.createElement('input');
+                        input.type = 'number';
+                        input.step = 'any';
+                        input.className = `w-full h-full min-h-[36px] px-2 absolute inset-0 font-mono text-right text-[13px] bg-transparent focus:outline-none focus:ring-0 focus:shadow-[inset_0_0_0_2px_#1f78d1] focus:bg-blue-50/30 dark:focus:bg-[#1f78d1]/20 focus:z-10 transition-none ${metric.isHighlight ? 'text-blue-700 font-semibold dark:text-blue-300' : 'text-[#262633] dark:text-gristDarkText'}`;
+                        input.value = finalVal;
+
+                        // Simpan setiap ketikan
+                        input.addEventListener('input', (e) => {
+                            AppState.unsavedEdits[editKey] = e.target.value;
+                        });
+
+                        td.appendChild(input);
+                        tr.appendChild(td);
+                    });
+
+                    this.els.tbody.appendChild(tr);
+                });
+
+                this.els.loadingPanel.classList.add('hidden');
+                this.els.tableContainer.classList.remove('hidden');
+            }
+        };
+
+        // ==========================================
+        // 4. BUSINESS LOGIC
+        // ==========================================
+        const BusinessLogic = {
+            processIncomingRecords(records) {
+                if (!records || records.length === 0) {
+                    AppState.allRecords = [];
+                    UIManager.renderTable();
+                    return;
+                }
+
+                // Cek kolom wajib (Sampling)
+                const sample = records[0];
+                if (!(Config.colPeriode in sample) || !(Config.colSource in sample)) {
+                    UIManager.showError(`<b>Error Kolom:</b> Kolom '${Config.colPeriode}' atau '${Config.colSource}' tidak ditemukan di tabel Grist Anda.`);
+                    return;
+                }
+
+                // Menyimpan semua record persis seperti yang dikirim Grist
+                AppState.allRecords = records;
+                UIManager.renderTable();
+            },
+
+            generateSavePayload() {
+                // Grouping berdasarkan Row ID
+                const groupedUpdates = {};
+
+                for (let key in AppState.unsavedEdits) {
+                    const [recordId, metricId] = key.split('|');
+                    const rawVal = AppState.unsavedEdits[key];
+                    const numVal = rawVal === '' ? null : Number(rawVal); // Izinkan hapus nilai
+
+                    if (!groupedUpdates[recordId]) {
+                        groupedUpdates[recordId] = {};
+                    }
+                    groupedUpdates[recordId][metricId] = numVal;
+                }
+
+                // Terjemahkan ke API Actions
+                const apiActions = [];
+                for (let recordId in groupedUpdates) {
+                    apiActions.push(['UpdateRecord', Config.tableId, parseInt(recordId, 10), groupedUpdates[recordId]]);
+                }
+
+                return apiActions;
+            }
+        };
+
+        // ==========================================
+        // 5. INISIALISASI
+        // ==========================================
+        document.addEventListener('DOMContentLoaded', () => {
+            // Setup Tema
+            const btn = document.getElementById('theme-toggle');
+            const darkIcon = document.getElementById('theme-toggle-dark-icon');
+            const lightIcon = document.getElementById('theme-toggle-light-icon');
+
+            if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            }
+            if (document.documentElement.classList.contains('dark')) lightIcon.classList.remove('hidden');
+            else darkIcon.classList.remove('hidden');
+
+            btn.addEventListener('click', () => {
+                darkIcon.classList.toggle('hidden');
+                lightIcon.classList.toggle('hidden');
+                document.documentElement.classList.toggle('dark');
+                localStorage.setItem('color-theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+            });
+
+            // Hubungkan Grist
+            grist.ready({ requiredAccess: 'full' });
+
+            grist.onRecords(records => {
+                BusinessLogic.processIncomingRecords(records);
+            });
+
+            // Event Simpan
+            UIManager.els.saveBtn.addEventListener('click', async () => {
+                const actions = BusinessLogic.generateSavePayload();
+
+                if (actions.length === 0) {
+                    UIManager.setSaveBtnState('no-change');
+                    setTimeout(() => UIManager.setSaveBtnState('default'), 2000);
+                    return;
+                }
+
+                try {
+                    UIManager.setSaveBtnState('loading');
+                    await grist.docApi.applyUserActions(actions);
+                    AppState.unsavedEdits = {}; // Reset memori jika sukses
+                    UIManager.setSaveBtnState('success');
+                } catch (error) {
+                    console.error(error);
+                    UIManager.setSaveBtnState('error');
+                    alert("Gagal menyimpan ke Grist: " + error.message);
+                } finally {
+                    setTimeout(() => UIManager.setSaveBtnState('default'), 2000);
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
