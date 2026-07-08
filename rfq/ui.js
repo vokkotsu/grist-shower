@@ -38,15 +38,15 @@ const UIManager = {
         this.els.tbody.innerHTML = '';
 
         // --- HEADER ---
-        // 1. Kolom Periode (Sticky 1 Solid)
+        // 1. Kolom Periode (Dilebarkan ke 180px)
         let thPeriode = document.createElement('th');
-        thPeriode.className = "bg-[#f7f7f7] dark:bg-gristDarkPanel text-[#929299] dark:text-gristDarkMuted text-[11px] uppercase tracking-wider font-semibold border border-[#d9d9d9] dark:border-gristDarkBorder p-2 text-center min-w-[120px] w-[120px] sticky left-0 z-40 transition-colors duration-200";
+        thPeriode.className = "bg-[#f7f7f7] dark:bg-gristDarkPanel text-[#929299] dark:text-gristDarkMuted text-[11px] uppercase tracking-wider font-semibold border border-[#d9d9d9] dark:border-gristDarkBorder p-2 text-center min-w-[180px] w-[180px] sticky left-0 z-40 transition-colors duration-200";
         thPeriode.innerText = "Periode";
         this.els.thead.appendChild(thPeriode);
 
-        // 2. Kolom Source (Sticky 2 Solid)
+        // 2. Kolom Source (Dilebarkan ke 220px, offset sticky diubah ke 180px)
         let thSource = document.createElement('th');
-        thSource.className = "bg-[#f7f7f7] dark:bg-gristDarkPanel text-[#929299] dark:text-gristDarkMuted text-[11px] uppercase tracking-wider font-semibold border border-[#d9d9d9] dark:border-gristDarkBorder p-2 text-left min-w-[160px] w-[160px] sticky left-[120px] sticky-shadow z-40 transition-colors duration-200";
+        thSource.className = "bg-[#f7f7f7] dark:bg-gristDarkPanel text-[#929299] dark:text-gristDarkMuted text-[11px] uppercase tracking-wider font-semibold border border-[#d9d9d9] dark:border-gristDarkBorder p-2 text-left min-w-[220px] w-[220px] sticky left-[180px] sticky-shadow z-40 transition-colors duration-200";
         thSource.innerText = "Source";
         this.els.thead.appendChild(thSource);
 
@@ -72,9 +72,9 @@ const UIManager = {
             tr.className = "hover:bg-blue-50/20 dark:hover:bg-white/5 transition-colors duration-150 group";
             const isNewRow = String(record.id).startsWith('new_');
 
-            // 1. Cell Periode (Sticky Solid - Tidak Overlap)
+            // 1. Cell Periode (Dilebarkan ke 180px)
             let tdPeriode = document.createElement('td');
-            tdPeriode.className = "p-0 relative border border-[#d9d9d9] dark:border-gristDarkBorder sticky left-0 z-20 transition-colors duration-200 bg-white dark:bg-gristDarkBg group-hover:bg-blue-50/20 dark:group-hover:bg-[#343442]";
+            tdPeriode.className = "p-0 relative border border-[#d9d9d9] dark:border-gristDarkBorder min-w-[180px] w-[180px] sticky left-0 z-20 transition-colors duration-200 bg-white dark:bg-gristDarkBg group-hover:bg-blue-50/20 dark:group-hover:bg-[#343442]";
 
             const keyPeriode = `${record.id}|${Config.colPeriode}`;
             let dbPeriode = DateUtil.parse(record[Config.colPeriode]) || '';
@@ -83,7 +83,6 @@ const UIManager = {
             let inputPeriode = document.createElement('input');
             inputPeriode.type = 'text';
             inputPeriode.placeholder = 'Mei 24';
-            // Menghilangkan "absolute inset-0" untuk mencegah row tinggi nol (runtuh/tumpang tindih)
             inputPeriode.className = "block w-full h-full min-h-[36px] px-2 text-center text-[13px] text-[#262633] dark:text-gristDarkText font-medium bg-transparent focus:outline-none focus:ring-0 focus:shadow-[inset_0_0_0_2px_#1f78d1] focus:bg-blue-50/30 dark:focus:bg-[#1f78d1]/20 transition-none";
             if (isNewRow && !valPeriode) inputPeriode.classList.add('bg-yellow-50', 'dark:bg-yellow-900/20');
             inputPeriode.value = valPeriode;
@@ -95,20 +94,18 @@ const UIManager = {
             tdPeriode.appendChild(inputPeriode);
             tr.appendChild(tdPeriode);
 
-            // 2. Cell Source (Sticky Solid - Sekarang Berupa Dropdown Select)
+            // 2. Cell Source (Dilebarkan ke 220px, offset left 180px)
             let tdSource = document.createElement('td');
-            tdSource.className = "p-0 relative border border-[#d9d9d9] dark:border-gristDarkBorder sticky left-[120px] sticky-shadow z-20 transition-colors duration-200 bg-white dark:bg-gristDarkBg group-hover:bg-blue-50/20 dark:group-hover:bg-[#343442]";
+            tdSource.className = "p-0 relative border border-[#d9d9d9] dark:border-gristDarkBorder min-w-[220px] w-[220px] sticky left-[180px] sticky-shadow z-20 transition-colors duration-200 bg-white dark:bg-gristDarkBg group-hover:bg-blue-50/20 dark:group-hover:bg-[#343442]";
 
             const keySource = `${record.id}|${Config.colSource}`;
             let dbSource = ValUtil.getChoiceVal(record[Config.colSource]) || '';
             let valSource = AppState.unsavedEdits[keySource] !== undefined ? AppState.unsavedEdits[keySource] : dbSource;
 
             let selectSource = document.createElement('select');
-            // Menghilangkan "absolute inset-0"
             selectSource.className = "block w-full h-full min-h-[36px] px-2 text-left text-[13px] text-[#262633] dark:text-gristDarkText font-medium bg-transparent focus:outline-none focus:ring-0 focus:shadow-[inset_0_0_0_2px_#1f78d1] focus:bg-blue-50/30 dark:focus:bg-[#1f78d1]/20 transition-none cursor-pointer outline-none";
             if (isNewRow && !valSource) selectSource.classList.add('bg-yellow-50', 'dark:bg-yellow-900/20');
 
-            // Option default
             let defaultOpt = document.createElement('option');
             defaultOpt.value = "";
             defaultOpt.text = "- Pilih Source -";
@@ -116,7 +113,6 @@ const UIManager = {
             if (!valSource) defaultOpt.selected = true;
             selectSource.appendChild(defaultOpt);
 
-            // Looping dari hasil deteksi Source yang ada di Grist
             AppState.uniqueSources.forEach(src => {
                 let opt = document.createElement('option');
                 opt.value = src;
@@ -133,7 +129,7 @@ const UIManager = {
             tdSource.appendChild(selectSource);
             tr.appendChild(tdSource);
 
-            // 3. Cells Metrik Dinamis (Input Type Number)
+            // 3. Cells Metrik Dinamis
             Config.metricColumns.forEach(metric => {
                 let td = document.createElement('td');
                 td.className = "p-0 relative h-full border border-[#d9d9d9] dark:border-gristDarkBorder bg-white dark:bg-gristDarkBg group-hover:bg-transparent transition-colors duration-200";
@@ -145,7 +141,6 @@ const UIManager = {
                 let input = document.createElement('input');
                 input.type = 'number';
                 input.step = 'any';
-                // Menghilangkan "absolute inset-0"
                 input.className = `block w-full h-full min-h-[36px] px-2 font-mono text-right text-[13px] bg-transparent focus:outline-none focus:ring-0 focus:shadow-[inset_0_0_0_2px_#1f78d1] focus:bg-blue-50/30 dark:focus:bg-[#1f78d1]/20 transition-none ${metric.isHighlight ? 'text-blue-700 font-semibold dark:text-blue-300' : 'text-[#262633] dark:text-gristDarkText'}`;
                 input.value = finalVal;
 

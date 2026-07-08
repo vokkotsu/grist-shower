@@ -7,6 +7,7 @@ const Config = {
     metricColumns: [
         { id: 'rm_powder', label: 'Quantity RM Powder (KG)', width: '90px' },
         { id: 'rm_oli', label: 'Quantity RM Oil (KG)', width: '90px' },
+        { id: 'rm_glucose', label: 'Quantity RM Glucose (KG)', width: '90px' }
     ]
 };
 
