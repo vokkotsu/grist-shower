@@ -37,16 +37,27 @@ const UIManager = {
         this.els.thead.innerHTML = '';
         this.els.tbody.innerHTML = '';
 
+        // --- KONFIGURASI LEBAR KOLOM ---
+        // Anda bisa mengubah nilai di sini jika ingin menyesuaikan lebar:
+        const widthPeriode = "360px";
+        const widthSource = "440px";
+        const leftOffsetSource = "360px"; // Harus sama dengan lebar Periode
+
         // --- HEADER ---
-        // 1. Kolom Periode (Dilebarkan ke 180px)
+        // 1. Kolom Periode
         let thPeriode = document.createElement('th');
-        thPeriode.className = "bg-[#f7f7f7] dark:bg-gristDarkPanel text-[#929299] dark:text-gristDarkMuted text-[11px] uppercase tracking-wider font-semibold border border-[#d9d9d9] dark:border-gristDarkBorder p-2 text-center min-w-[180px] w-[180px] sticky left-0 z-40 transition-colors duration-200";
+        thPeriode.className = `bg-[#f7f7f7] dark:bg-gristDarkPanel text-[#929299] dark:text-gristDarkMuted text-[11px] uppercase tracking-wider font-semibold border border-[#d9d9d9] dark:border-gristDarkBorder p-2 text-center min-w-[${widthPeriode}] w-[${widthPeriode}] sticky left-0 z-40 transition-colors duration-200`;
+        thPeriode.style.minWidth = widthPeriode;
+        thPeriode.style.width = widthPeriode;
         thPeriode.innerText = "Periode";
         this.els.thead.appendChild(thPeriode);
 
-        // 2. Kolom Source (Dilebarkan ke 220px, offset sticky diubah ke 180px)
+        // 2. Kolom Source
         let thSource = document.createElement('th');
-        thSource.className = "bg-[#f7f7f7] dark:bg-gristDarkPanel text-[#929299] dark:text-gristDarkMuted text-[11px] uppercase tracking-wider font-semibold border border-[#d9d9d9] dark:border-gristDarkBorder p-2 text-left min-w-[220px] w-[220px] sticky left-[180px] sticky-shadow z-40 transition-colors duration-200";
+        thSource.className = `bg-[#f7f7f7] dark:bg-gristDarkPanel text-[#929299] dark:text-gristDarkMuted text-[11px] uppercase tracking-wider font-semibold border border-[#d9d9d9] dark:border-gristDarkBorder p-2 text-left min-w-[${widthSource}] w-[${widthSource}] sticky left-[${leftOffsetSource}] sticky-shadow z-40 transition-colors duration-200`;
+        thSource.style.minWidth = widthSource;
+        thSource.style.width = widthSource;
+        thSource.style.left = leftOffsetSource;
         thSource.innerText = "Source";
         this.els.thead.appendChild(thSource);
 
@@ -72,9 +83,11 @@ const UIManager = {
             tr.className = "hover:bg-blue-50/20 dark:hover:bg-white/5 transition-colors duration-150 group";
             const isNewRow = String(record.id).startsWith('new_');
 
-            // 1. Cell Periode (Dilebarkan ke 180px)
+            // 1. Cell Periode
             let tdPeriode = document.createElement('td');
-            tdPeriode.className = "p-0 relative border border-[#d9d9d9] dark:border-gristDarkBorder min-w-[180px] w-[180px] sticky left-0 z-20 transition-colors duration-200 bg-white dark:bg-gristDarkBg group-hover:bg-blue-50/20 dark:group-hover:bg-[#343442]";
+            tdPeriode.className = "p-0 relative border border-[#d9d9d9] dark:border-gristDarkBorder sticky left-0 z-20 transition-colors duration-200 bg-white dark:bg-gristDarkBg group-hover:bg-blue-50/20 dark:group-hover:bg-[#343442]";
+            tdPeriode.style.minWidth = widthPeriode;
+            tdPeriode.style.width = widthPeriode;
 
             const keyPeriode = `${record.id}|${Config.colPeriode}`;
             let dbPeriode = DateUtil.parse(record[Config.colPeriode]) || '';
@@ -94,9 +107,12 @@ const UIManager = {
             tdPeriode.appendChild(inputPeriode);
             tr.appendChild(tdPeriode);
 
-            // 2. Cell Source (Dilebarkan ke 220px, offset left 180px)
+            // 2. Cell Source
             let tdSource = document.createElement('td');
-            tdSource.className = "p-0 relative border border-[#d9d9d9] dark:border-gristDarkBorder min-w-[220px] w-[220px] sticky left-[180px] sticky-shadow z-20 transition-colors duration-200 bg-white dark:bg-gristDarkBg group-hover:bg-blue-50/20 dark:group-hover:bg-[#343442]";
+            tdSource.className = "p-0 relative border border-[#d9d9d9] dark:border-gristDarkBorder sticky sticky-shadow z-20 transition-colors duration-200 bg-white dark:bg-gristDarkBg group-hover:bg-blue-50/20 dark:group-hover:bg-[#343442]";
+            tdSource.style.minWidth = widthSource;
+            tdSource.style.width = widthSource;
+            tdSource.style.left = leftOffsetSource;
 
             const keySource = `${record.id}|${Config.colSource}`;
             let dbSource = ValUtil.getChoiceVal(record[Config.colSource]) || '';
