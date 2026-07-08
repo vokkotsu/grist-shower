@@ -43,10 +43,10 @@ const UIManager = {
         thPeriode.innerText = "Periode";
         this.els.thead.appendChild(thPeriode);
 
-        let thDepartment = document.createElement('th');
-        thDepartment.className = "bg-[#f7f7f7] dark:bg-gristDarkPanel text-[#929299] dark:text-gristDarkMuted text-[11px] uppercase tracking-wider font-semibold border border-[#d9d9d9] dark:border-gristDarkBorder p-2 text-left min-w-[160px] w-[160px] sticky left-[150px] sticky-shadow z-40 transition-colors duration-200";
-        thDepartment.innerText = "Department";
-        this.els.thead.appendChild(thDepartment);
+        let thSource = document.createElement('th');
+        thSource.className = "bg-[#f7f7f7] dark:bg-gristDarkPanel text-[#929299] dark:text-gristDarkMuted text-[11px] uppercase tracking-wider font-semibold border border-[#d9d9d9] dark:border-gristDarkBorder p-2 text-left min-w-[160px] w-[160px] sticky left-[150px] sticky-shadow z-40 transition-colors duration-200";
+        thSource.innerText = "Source";
+        this.els.thead.appendChild(thSource);
 
         Config.metricColumns.forEach(metric => {
             let th = document.createElement('th');
@@ -90,39 +90,39 @@ const UIManager = {
             tdPeriode.appendChild(inputPeriode);
             tr.appendChild(tdPeriode);
 
-            // 2. CELL Department (DROPDOWN)
-            let tdDepartment = document.createElement('td');
-            tdDepartment.className = "p-0 relative border border-[#d9d9d9] dark:border-gristDarkBorder sticky left-[150px] sticky-shadow z-20 transition-colors duration-200 bg-white dark:bg-gristDarkBg group-hover:bg-blue-50/20 dark:group-hover:bg-[#343442]";
+            // 2. CELL Source (DROPDOWN)
+            let tdSource = document.createElement('td');
+            tdSource.className = "p-0 relative border border-[#d9d9d9] dark:border-gristDarkBorder sticky left-[150px] sticky-shadow z-20 transition-colors duration-200 bg-white dark:bg-gristDarkBg group-hover:bg-blue-50/20 dark:group-hover:bg-[#343442]";
 
-            const keyDepartment = `${record.id}|${Config.colDepartment}`;
-            let dbDepartment = ValUtil.getChoiceVal(record[Config.colDepartment]) || '';
-            let valDepartment = AppState.unsavedEdits[keyDepartment] !== undefined ? AppState.unsavedEdits[keyDepartment] : dbDepartment;
+            const keySource = `${record.id}|${Config.colSource}`;
+            let dbSource = ValUtil.getChoiceVal(record[Config.colSource]) || '';
+            let valSource = AppState.unsavedEdits[keySource] !== undefined ? AppState.unsavedEdits[keySource] : dbSource;
 
-            let selectDepartment = document.createElement('select');
-            selectDepartment.className = "block w-full h-full min-h-[36px] px-2 text-left text-[13px] text-[#262633] dark:text-gristDarkText font-medium bg-transparent focus:outline-none focus:ring-0 focus:shadow-[inset_0_0_0_2px_#1f78d1] focus:bg-blue-50/30 dark:focus:bg-[#1f78d1]/20 transition-none cursor-pointer outline-none";
-            if (isNewRow && !valDepartment) selectDepartment.classList.add('bg-yellow-50', 'dark:bg-yellow-900/20');
+            let selectSource = document.createElement('select');
+            selectSource.className = "block w-full h-full min-h-[36px] px-2 text-left text-[13px] text-[#262633] dark:text-gristDarkText font-medium bg-transparent focus:outline-none focus:ring-0 focus:shadow-[inset_0_0_0_2px_#1f78d1] focus:bg-blue-50/30 dark:focus:bg-[#1f78d1]/20 transition-none cursor-pointer outline-none";
+            if (isNewRow && !valSource) selectSource.classList.add('bg-yellow-50', 'dark:bg-yellow-900/20');
 
             let defaultOpt = document.createElement('option');
             defaultOpt.value = "";
-            defaultOpt.text = "- Pilih Department -";
+            defaultOpt.text = "- Pilih Source -";
             defaultOpt.disabled = true;
-            if (!valDepartment) defaultOpt.selected = true;
-            selectDepartment.appendChild(defaultOpt);
+            if (!valSource) defaultOpt.selected = true;
+            selectSource.appendChild(defaultOpt);
 
-            AppState.uniqueDepartments.forEach(src => {
+            AppState.uniqueSources.forEach(src => {
                 let opt = document.createElement('option');
                 opt.value = src; opt.text = src;
                 opt.className = "text-[#262633] dark:text-white bg-white dark:bg-gristDarkBg";
-                if (src === valDepartment) opt.selected = true;
-                selectDepartment.appendChild(opt);
+                if (src === valSource) opt.selected = true;
+                selectSource.appendChild(opt);
             });
 
-            selectDepartment.addEventListener('change', (e) => {
-                AppState.unsavedEdits[keyDepartment] = e.target.value;
-                if (e.target.value) selectDepartment.classList.remove('bg-yellow-50', 'dark:bg-yellow-900/20');
+            selectSource.addEventListener('change', (e) => {
+                AppState.unsavedEdits[keySource] = e.target.value;
+                if (e.target.value) selectSource.classList.remove('bg-yellow-50', 'dark:bg-yellow-900/20');
             });
-            tdDepartment.appendChild(selectDepartment);
-            tr.appendChild(tdDepartment);
+            tdSource.appendChild(selectSource);
+            tr.appendChild(tdSource);
 
             // 3. CELLS METRIK NUMERIK
             Config.metricColumns.forEach(metric => {
