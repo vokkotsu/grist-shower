@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OEE Metrics Dashboard (Flat)</title>
+    <title>OEE Metrics Dashboard</title>
     <!-- Memuat Grist API -->
     <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
     <!-- Memuat Tailwind CSS -->
@@ -62,11 +62,7 @@
             border: 2px solid #262633;
         }
 
-        .dark ::-webkit-scrollbar-thumb:hover {
-            background: #66667a;
-        }
-
-        /* Sembunyikan panah input agar rapi */
+        /* Sembunyikan panah input numerik agar rapi */
         input[type=number]::-webkit-inner-spin-button,
         input[type=number]::-webkit-outer-spin-button {
             -webkit-appearance: none;
@@ -81,6 +77,16 @@
         .dark .sticky-shadow {
             box-shadow: 4px 0 6px -2px rgba(0, 0, 0, 0.3);
         }
+
+        /* Kustomisasi Icon Date Picker agar cocok di mode gelap */
+        .dark input[type="month"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            cursor: pointer;
+        }
+
+        input[type="month"]::-webkit-calendar-picker-indicator {
+            cursor: pointer;
+        }
     </style>
 </head>
 
@@ -93,22 +99,20 @@
             class="border-b border-[#d9d9d9] dark:border-gristDarkBorder py-2.5 px-4 flex justify-between items-center bg-white dark:bg-gristDarkBg z-30 flex-wrap gap-4 transition-colors duration-200">
             <div>
                 <h2 class="text-[15px] font-semibold text-[#262633] dark:text-gristDarkText">OEE Metrics Tracker</h2>
-                <p class="text-[11px] text-[#929299] dark:text-gristDarkMuted mt-0.5">Edit seluruh sel termasuk Periode
-                    & Source. Kolom beku (Sticky) solid.</p>
+                <p class="text-[11px] text-[#929299] dark:text-gristDarkMuted mt-0.5">Edit seluruh sel. Input Periode
+                    kini menggunakan kalender anti-error.</p>
             </div>
 
             <div class="flex gap-2 items-center">
                 <button type="button" id="theme-toggle"
                     class="text-[#929299] dark:text-gristDarkMuted hover:bg-[#f7f7f7] dark:hover:bg-gristDarkPanel hover:text-[#262633] dark:hover:text-gristDarkText p-1.5 rounded transition duration-150 mr-2"
                     title="Ganti Tema">
-                    <svg id="theme-toggle-light-icon" class="hidden w-4 h-4" fill="currentColor" viewBox="0 0 20 20"
-                        xmlns="http://www.w3.org/2000/svg">
+                    <svg id="theme-toggle-light-icon" class="hidden w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                         <path
                             d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z">
                         </path>
                     </svg>
-                    <svg id="theme-toggle-dark-icon" class="hidden w-4 h-4" fill="currentColor" viewBox="0 0 20 20"
-                        xmlns="http://www.w3.org/2000/svg">
+                    <svg id="theme-toggle-dark-icon" class="hidden w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
                     </svg>
                 </button>
@@ -152,7 +156,6 @@
             </table>
         </div>
     </div>
-
     <script src="config.js"></script>
     <script src="utils.js"></script>
     <script src="ui.js"></script>

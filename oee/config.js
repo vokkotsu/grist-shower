@@ -3,7 +3,7 @@ const Config = {
     colPeriode: 'periode',
     colSource: 'source',
 
-    // Daftar lengkap kolom numerik OEE secara berurutan (Kiri ke Kanan)
+    // Daftar lengkap kolom numerik OEE
     metricColumns: [
         { id: 'days_per_month', label: 'Days/Mo', width: '90px' },
         { id: 'idle_time', label: 'Idle (Hrs)', width: '90px' },
@@ -32,7 +32,7 @@ const Config = {
 
 const AppState = {
     allRecords: [],
-    uniqueSources: [], // Menyimpan daftar Dropdown Source
+    uniqueSources: [],
     unsavedEdits: {},
     newRecordCounter: 1
 };
