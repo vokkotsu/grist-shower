@@ -94,7 +94,7 @@
             <div>
                 <h2 class="text-[15px] font-semibold text-[#262633] dark:text-gristDarkText">OEE Metrics Tracker</h2>
                 <p class="text-[11px] text-[#929299] dark:text-gristDarkMuted mt-0.5">Edit seluruh sel termasuk Periode
-                    & Source. Kolom beku (Sticky).</p>
+                    & Source. Kolom beku (Sticky) solid.</p>
             </div>
 
             <div class="flex gap-2 items-center">
@@ -145,7 +145,7 @@
             class="hidden flex-grow overflow-auto p-0 relative bg-[#f7f7f7] dark:bg-[#1e1e24] transition-colors duration-200">
             <table
                 class="w-max border-collapse text-sm whitespace-nowrap bg-white dark:bg-gristDarkBg transition-colors duration-200">
-                <thead class="sticky top-0 z-20">
+                <thead class="sticky top-0 z-30">
                     <tr id="table-head"></tr>
                 </thead>
                 <tbody id="table-body"></tbody>
@@ -191,8 +191,9 @@
 
         const AppState = {
             allRecords: [],
-            unsavedEdits: {}, // format key: "recordId|metricId" (atau colPeriode/colSource)
-            newRecordCounter: 1 // Counter unik untuk baris yang belum masuk ke database
+            uniqueSources: [], // Menyimpan daftar Dropdown Source
+            unsavedEdits: {},
+            newRecordCounter: 1
         };
 
         // ==========================================
@@ -298,22 +299,22 @@
                 this.els.tbody.innerHTML = '';
 
                 // --- HEADER ---
-                // 1. Kolom Periode (Sticky 1)
+                // 1. Kolom Periode (Sticky 1 Solid)
                 let thPeriode = document.createElement('th');
-                thPeriode.className = "bg-[#f7f7f7] dark:bg-gristDarkPanel text-[#929299] dark:text-gristDarkMuted text-[11px] uppercase tracking-wider font-semibold border border-[#d9d9d9] dark:border-gristDarkBorder p-2 text-center min-w-[120px] sticky left-0 z-30 transition-colors duration-200";
+                thPeriode.className = "bg-[#f7f7f7] dark:bg-gristDarkPanel text-[#929299] dark:text-gristDarkMuted text-[11px] uppercase tracking-wider font-semibold border border-[#d9d9d9] dark:border-gristDarkBorder p-2 text-center min-w-[120px] w-[120px] sticky left-0 z-40 transition-colors duration-200";
                 thPeriode.innerText = "Periode";
                 this.els.thead.appendChild(thPeriode);
 
-                // 2. Kolom Source (Sticky 2)
+                // 2. Kolom Source (Sticky 2 Solid)
                 let thSource = document.createElement('th');
-                thSource.className = "bg-[#f7f7f7] dark:bg-gristDarkPanel text-[#929299] dark:text-gristDarkMuted text-[11px] uppercase tracking-wider font-semibold border border-[#d9d9d9] dark:border-gristDarkBorder p-2 text-left min-w-[160px] sticky left-[120px] sticky-shadow z-30 transition-colors duration-200";
+                thSource.className = "bg-[#f7f7f7] dark:bg-gristDarkPanel text-[#929299] dark:text-gristDarkMuted text-[11px] uppercase tracking-wider font-semibold border border-[#d9d9d9] dark:border-gristDarkBorder p-2 text-left min-w-[160px] w-[160px] sticky left-[120px] sticky-shadow z-40 transition-colors duration-200";
                 thSource.innerText = "Source";
                 this.els.thead.appendChild(thSource);
 
                 // 3. Header Metrik Dinamis
                 Config.metricColumns.forEach(metric => {
                     let th = document.createElement('th');
-                    th.className = `bg-[#f7f7f7] dark:bg-gristDarkPanel text-[#929299] dark:text-gristDarkMuted text-[11px] uppercase tracking-wider font-semibold border border-[#d9d9d9] dark:border-gristDarkBorder p-2 text-right transition-colors duration-200 ${metric.isHighlight ? 'text-blue-600 dark:text-blue-400' : ''}`;
+                    th.className = `bg-[#f7f7f7] dark:bg-gristDarkPanel text-[#929299] dark:text-gristDarkMuted text-[11px] uppercase tracking-wider font-semibold border border-[#d9d9d9] dark:border-gristDarkBorder p-2 text-right z-30 transition-colors duration-200 ${metric.isHighlight ? 'text-blue-600 dark:text-blue-400' : ''}`;
                     th.style.minWidth = metric.width;
                     th.innerText = metric.label;
                     this.els.thead.appendChild(th);
@@ -329,12 +330,12 @@
 
                 AppState.allRecords.forEach(record => {
                     let tr = document.createElement('tr');
-                    tr.className = "hover:bg-blue-50/20 dark:hover:bg-white/5 transition-colors duration-150";
+                    tr.className = "hover:bg-blue-50/20 dark:hover:bg-white/5 transition-colors duration-150 group";
                     const isNewRow = String(record.id).startsWith('new_');
 
-                    // 1. Cell Periode (Editable Sticky)
+                    // 1. Cell Periode (Sticky Solid - Tidak Overlap)
                     let tdPeriode = document.createElement('td');
-                    tdPeriode.className = "p-0 relative bg-white dark:bg-gristDarkBg border border-[#d9d9d9] dark:border-gristDarkBorder sticky left-0 z-20 transition-colors duration-200";
+                    tdPeriode.className = "p-0 relative border border-[#d9d9d9] dark:border-gristDarkBorder sticky left-0 z-20 transition-colors duration-200 bg-white dark:bg-gristDarkBg group-hover:bg-blue-50/20 dark:group-hover:bg-[#343442]";
 
                     const keyPeriode = `${record.id}|${Config.colPeriode}`;
                     let dbPeriode = DateUtil.parse(record[Config.colPeriode]) || '';
@@ -342,8 +343,9 @@
 
                     let inputPeriode = document.createElement('input');
                     inputPeriode.type = 'text';
-                    inputPeriode.placeholder = 'Misal: Mei 24';
-                    inputPeriode.className = "w-full h-full min-h-[36px] px-2 absolute inset-0 text-center text-[13px] text-[#262633] dark:text-gristDarkText font-medium bg-transparent focus:outline-none focus:ring-0 focus:shadow-[inset_0_0_0_2px_#1f78d1] focus:bg-blue-50/30 dark:focus:bg-[#1f78d1]/20 focus:z-10 transition-none";
+                    inputPeriode.placeholder = 'Mei 24';
+                    // Menghilangkan "absolute inset-0" untuk mencegah row tinggi nol (runtuh/tumpang tindih)
+                    inputPeriode.className = "block w-full h-full min-h-[36px] px-2 text-center text-[13px] text-[#262633] dark:text-gristDarkText font-medium bg-transparent focus:outline-none focus:ring-0 focus:shadow-[inset_0_0_0_2px_#1f78d1] focus:bg-blue-50/30 dark:focus:bg-[#1f78d1]/20 transition-none";
                     if (isNewRow && !valPeriode) inputPeriode.classList.add('bg-yellow-50', 'dark:bg-yellow-900/20');
                     inputPeriode.value = valPeriode;
 
@@ -354,32 +356,48 @@
                     tdPeriode.appendChild(inputPeriode);
                     tr.appendChild(tdPeriode);
 
-                    // 2. Cell Source (Editable Sticky)
+                    // 2. Cell Source (Sticky Solid - Sekarang Berupa Dropdown Select)
                     let tdSource = document.createElement('td');
-                    tdSource.className = "p-0 relative bg-white dark:bg-gristDarkBg border border-[#d9d9d9] dark:border-gristDarkBorder sticky left-[120px] sticky-shadow z-20 transition-colors duration-200";
+                    tdSource.className = "p-0 relative border border-[#d9d9d9] dark:border-gristDarkBorder sticky left-[120px] sticky-shadow z-20 transition-colors duration-200 bg-white dark:bg-gristDarkBg group-hover:bg-blue-50/20 dark:group-hover:bg-[#343442]";
 
                     const keySource = `${record.id}|${Config.colSource}`;
                     let dbSource = ValUtil.getChoiceVal(record[Config.colSource]) || '';
                     let valSource = AppState.unsavedEdits[keySource] !== undefined ? AppState.unsavedEdits[keySource] : dbSource;
 
-                    let inputSource = document.createElement('input');
-                    inputSource.type = 'text';
-                    inputSource.placeholder = 'Nama Mesin/Source';
-                    inputSource.className = "w-full h-full min-h-[36px] px-2 absolute inset-0 text-left text-[13px] text-[#262633] dark:text-gristDarkText font-medium bg-transparent focus:outline-none focus:ring-0 focus:shadow-[inset_0_0_0_2px_#1f78d1] focus:bg-blue-50/30 dark:focus:bg-[#1f78d1]/20 focus:z-10 transition-none";
-                    if (isNewRow && !valSource) inputSource.classList.add('bg-yellow-50', 'dark:bg-yellow-900/20');
-                    inputSource.value = valSource;
+                    let selectSource = document.createElement('select');
+                    // Menghilangkan "absolute inset-0"
+                    selectSource.className = "block w-full h-full min-h-[36px] px-2 text-left text-[13px] text-[#262633] dark:text-gristDarkText font-medium bg-transparent focus:outline-none focus:ring-0 focus:shadow-[inset_0_0_0_2px_#1f78d1] focus:bg-blue-50/30 dark:focus:bg-[#1f78d1]/20 transition-none cursor-pointer outline-none";
+                    if (isNewRow && !valSource) selectSource.classList.add('bg-yellow-50', 'dark:bg-yellow-900/20');
 
-                    inputSource.addEventListener('input', (e) => {
-                        AppState.unsavedEdits[keySource] = e.target.value;
-                        if (e.target.value) inputSource.classList.remove('bg-yellow-50', 'dark:bg-yellow-900/20');
+                    // Option default
+                    let defaultOpt = document.createElement('option');
+                    defaultOpt.value = "";
+                    defaultOpt.text = "- Pilih Source -";
+                    defaultOpt.disabled = true;
+                    if (!valSource) defaultOpt.selected = true;
+                    selectSource.appendChild(defaultOpt);
+
+                    // Looping dari hasil deteksi Source yang ada di Grist
+                    AppState.uniqueSources.forEach(src => {
+                        let opt = document.createElement('option');
+                        opt.value = src;
+                        opt.text = src;
+                        opt.className = "text-[#262633] dark:text-white bg-white dark:bg-gristDarkBg";
+                        if (src === valSource) opt.selected = true;
+                        selectSource.appendChild(opt);
                     });
-                    tdSource.appendChild(inputSource);
+
+                    selectSource.addEventListener('change', (e) => {
+                        AppState.unsavedEdits[keySource] = e.target.value;
+                        if (e.target.value) selectSource.classList.remove('bg-yellow-50', 'dark:bg-yellow-900/20');
+                    });
+                    tdSource.appendChild(selectSource);
                     tr.appendChild(tdSource);
 
                     // 3. Cells Metrik Dinamis (Input Type Number)
                     Config.metricColumns.forEach(metric => {
                         let td = document.createElement('td');
-                        td.className = "p-0 relative h-full border border-[#d9d9d9] dark:border-gristDarkBorder bg-white dark:bg-gristDarkBg";
+                        td.className = "p-0 relative h-full border border-[#d9d9d9] dark:border-gristDarkBorder bg-white dark:bg-gristDarkBg group-hover:bg-transparent transition-colors duration-200";
 
                         let dbVal = record[metric.id] !== null && record[metric.id] !== undefined ? record[metric.id] : '';
                         const editKey = `${record.id}|${metric.id}`;
@@ -388,10 +406,10 @@
                         let input = document.createElement('input');
                         input.type = 'number';
                         input.step = 'any';
-                        input.className = `w-full h-full min-h-[36px] px-2 absolute inset-0 font-mono text-right text-[13px] bg-transparent focus:outline-none focus:ring-0 focus:shadow-[inset_0_0_0_2px_#1f78d1] focus:bg-blue-50/30 dark:focus:bg-[#1f78d1]/20 focus:z-10 transition-none ${metric.isHighlight ? 'text-blue-700 font-semibold dark:text-blue-300' : 'text-[#262633] dark:text-gristDarkText'}`;
+                        // Menghilangkan "absolute inset-0"
+                        input.className = `block w-full h-full min-h-[36px] px-2 font-mono text-right text-[13px] bg-transparent focus:outline-none focus:ring-0 focus:shadow-[inset_0_0_0_2px_#1f78d1] focus:bg-blue-50/30 dark:focus:bg-[#1f78d1]/20 transition-none ${metric.isHighlight ? 'text-blue-700 font-semibold dark:text-blue-300' : 'text-[#262633] dark:text-gristDarkText'}`;
                         input.value = finalVal;
 
-                        // Simpan setiap ketikan
                         input.addEventListener('input', (e) => {
                             AppState.unsavedEdits[editKey] = e.target.value;
                         });
@@ -415,6 +433,7 @@
             processIncomingRecords(records) {
                 if (!records || records.length === 0) {
                     AppState.allRecords = [];
+                    AppState.uniqueSources = []; // Kosong
                     UIManager.renderTable();
                     return;
                 }
@@ -422,7 +441,6 @@
                 const sample = records[0];
                 const availableCols = Object.keys(sample);
 
-                // Deteksi Kolom Otomatis (Mengabaikan huruf besar/kecil)
                 const getActualCol = (confCol) => availableCols.find(c => c.toLowerCase() === confCol.toLowerCase()) || confCol;
 
                 Config.colPeriode = getActualCol(Config.colPeriode);
@@ -431,7 +449,6 @@
                     m.id = getActualCol(m.id);
                 });
 
-                // Cek kolom wajib exist (setelah di-mapping ulang)
                 if (!(Config.colPeriode in sample) || !(Config.colSource in sample)) {
                     let colsList = availableCols.filter(k => k !== 'id').join(', ');
                     UIManager.showError(`<b>Error Kolom:</b> Kolom '${Config.colPeriode}' atau '${Config.colSource}' tidak ditemukan di tabel Grist Anda.<br><br><b>Kolom yang terdeteksi di tabel:</b><br><span class="font-mono text-xs text-blue-600 bg-blue-50 p-2 rounded block mt-2 break-words leading-relaxed">${colsList}</span><br>Pastikan Anda memilih tabel yang benar pada Creator Panel Grist (Kanan).`);
@@ -439,10 +456,14 @@
                 }
 
                 AppState.allRecords = records;
+
+                // MENGUMPULKAN DAFTAR SOURCE UNTUK DROPDOWN
+                const sources = records.map(r => ValUtil.getChoiceVal(r[Config.colSource])).filter(Boolean);
+                AppState.uniqueSources = [...new Set(sources)].sort();
+
                 UIManager.renderTable();
             },
 
-            // Menambahkan baris kosong ke memori UI
             addNewRow() {
                 const newRecord = {
                     id: `new_${AppState.newRecordCounter++}`,
@@ -450,7 +471,6 @@
                     [Config.colSource]: ''
                 };
 
-                // Tambahkan metrik default
                 Config.metricColumns.forEach(m => {
                     newRecord[m.id] = null;
                 });
@@ -458,7 +478,6 @@
                 AppState.allRecords.push(newRecord);
                 UIManager.renderTable();
 
-                // Scroll table ke baris paling bawah secara otomatis
                 const container = UIManager.els.tableContainer;
                 container.scrollTop = container.scrollHeight;
             },
@@ -466,7 +485,6 @@
             generateSavePayload() {
                 const groupedUpdates = {};
 
-                // Grouping berdasarkan Row ID
                 for (let key in AppState.unsavedEdits) {
                     const [recordId, fieldId] = key.split('|');
                     const rawVal = AppState.unsavedEdits[key];
@@ -475,28 +493,26 @@
                         groupedUpdates[recordId] = {};
                     }
 
-                    // Casting tipe data
                     if (fieldId === Config.colPeriode || fieldId === Config.colSource) {
-                        groupedUpdates[recordId][fieldId] = rawVal; // Pertahankan sebagai String
+                        groupedUpdates[recordId][fieldId] = rawVal;
                     } else {
-                        groupedUpdates[recordId][fieldId] = rawVal === '' ? null : Number(rawVal); // Casting ke Number
+                        groupedUpdates[recordId][fieldId] = rawVal === '' ? null : Number(rawVal);
                     }
                 }
 
-                // Terjemahkan ke API Actions
                 const apiActions = [];
                 for (let recordId in groupedUpdates) {
                     const changes = groupedUpdates[recordId];
 
-                    // Konversi string periode (Bulan YY) menjadi format Date (YYYY-MM-DD) yang disukai Grist
                     if (changes[Config.colPeriode] !== undefined) {
                         changes[Config.colPeriode] = DateUtil.toGristString(changes[Config.colPeriode]);
                     }
 
-                    // Tentukan AddRecord atau UpdateRecord
                     if (String(recordId).startsWith('new_')) {
-                        // Pastikan jika ada row baru tapi tidak diisi source/periode, tidak dikirim (atau kirim null/string kosong)
-                        apiActions.push(['AddRecord', Config.tableId, null, changes]);
+                        // Jangan push kalau source/periode kosong pada baris baru
+                        if (changes[Config.colSource] && changes[Config.colPeriode]) {
+                            apiActions.push(['AddRecord', Config.tableId, null, changes]);
+                        }
                     } else {
                         apiActions.push(['UpdateRecord', Config.tableId, parseInt(recordId, 10), changes]);
                     }
@@ -510,7 +526,6 @@
         // 5. INISIALISASI
         // ==========================================
         document.addEventListener('DOMContentLoaded', () => {
-            // Setup Tema
             const btn = document.getElementById('theme-toggle');
             const darkIcon = document.getElementById('theme-toggle-dark-icon');
             const lightIcon = document.getElementById('theme-toggle-light-icon');
@@ -528,19 +543,16 @@
                 localStorage.setItem('color-theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
             });
 
-            // Hubungkan Grist
             grist.ready({ requiredAccess: 'full' });
 
             grist.onRecords(records => {
                 BusinessLogic.processIncomingRecords(records);
             });
 
-            // Event Tambah Baris
             UIManager.els.addRowBtn.addEventListener('click', () => {
                 BusinessLogic.addNewRow();
             });
 
-            // Event Simpan
             UIManager.els.saveBtn.addEventListener('click', async () => {
                 const actions = BusinessLogic.generateSavePayload();
 
@@ -553,7 +565,7 @@
                 try {
                     UIManager.setSaveBtnState('loading');
                     await grist.docApi.applyUserActions(actions);
-                    AppState.unsavedEdits = {}; // Reset memori jika sukses
+                    AppState.unsavedEdits = {};
                     UIManager.setSaveBtnState('success');
                 } catch (error) {
                     console.error(error);
