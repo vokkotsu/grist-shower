@@ -20,14 +20,14 @@ const BusinessLogic = {
 
         if (!(Config.colPeriode in sample) || !(Config.colSource in sample)) {
             let colsList = availableCols.filter(k => k !== 'id').join(', ');
-            UIManager.showError(`<b>Error Kolom:</b> Kolom '${Config.colPeriode}' atau '${Config.}' tidak ditemukan di tabel Grist Anda.<br><br><b>Kolom yang terdeteksi di tabel:</b><br><span class="font-mono text-xs text-blue-600 bg-blue-50 p-2 rounded block mt-2 break-words leading-relaxed">${colsList}</span><br>Pastikan Anda memilih tabel yang benar pada Creator Panel Grist (Kanan).`);
+            UIManager.showError(`<b>Error Kolom:</b> Kolom '${Config.colPeriode}' atau '${Config.colSource}' tidak ditemukan di tabel Grist Anda.<br><br><b>Kolom yang terdeteksi di tabel:</b><br><span class="font-mono text-xs text-blue-600 bg-blue-50 p-2 rounded block mt-2 break-words leading-relaxed">${colsList}</span><br>Pastikan Anda memilih tabel yang benar pada Creator Panel Grist (Kanan).`);
             return;
         }
 
         AppState.allRecords = records;
 
         // MENGUMPULKAN DAFTAR SOURCE UNTUK DROPDOWN
-        const sources = records.map(r => ValUtil.getChoiceVal(r[Config.])).filter(Boolean);
+        const sources = records.map(r => ValUtil.getChoiceVal(r[Config.colSource])).filter(Boolean);
         AppState.uniqueSources = [...new Set(sources)].sort();
 
         UIManager.renderTable();
@@ -37,7 +37,7 @@ const BusinessLogic = {
         const newRecord = {
             id: `new_${AppState.newRecordCounter++}`,
             [Config.colPeriode]: '',
-            [Config.]: ''
+            [Config.colSource]: ''
         };
 
         Config.metricColumns.forEach(m => {
@@ -62,7 +62,7 @@ const BusinessLogic = {
                 groupedUpdates[recordId] = {};
             }
 
-            if (fieldId === Config.colPeriode || fieldId === Config.) {
+            if (fieldId === Config.colPeriode || fieldId === Config.colSource) {
                 groupedUpdates[recordId][fieldId] = rawVal;
             } else {
                 groupedUpdates[recordId][fieldId] = rawVal === '' ? null : Number(rawVal);
