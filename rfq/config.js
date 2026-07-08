@@ -1,5 +1,5 @@
 const Config = {
-    tableId: 'Rfq_rft_metric__monthly',
+    tableId: 'Rfq_rft_metric__monthly2',
     colPeriode: 'periode',
     colSource: 'source',
 
