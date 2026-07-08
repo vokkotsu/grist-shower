@@ -18,13 +18,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     grist.ready({ requiredAccess: 'full' });
 
-    grist.onRecords(records => {
-        BusinessLogic.processIncomingRecords(records);
-    });
+    grist.onRecords(records => BusinessLogic.processIncomingRecords(records));
 
-    UIManager.els.addRowBtn.addEventListener('click', () => {
-        BusinessLogic.addNewRow();
-    });
+    UIManager.els.addRowBtn.addEventListener('click', () => BusinessLogic.addNewRow());
 
     UIManager.els.saveBtn.addEventListener('click', async () => {
         const actions = BusinessLogic.generateSavePayload();
