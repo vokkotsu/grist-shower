@@ -37,31 +37,17 @@ const UIManager = {
         this.els.thead.innerHTML = '';
         this.els.tbody.innerHTML = '';
 
-        // --- KONFIGURASI LEBAR KOLOM ---
-        // Anda bisa mengubah nilai di sini jika ingin menyesuaikan lebar:
-        const widthPeriode = "360px";
-        const widthSource = "440px";
-        const leftOffsetSource = "360px"; // Harus sama dengan lebar Periode
-
-        // --- HEADER ---
-        // 1. Kolom Periode
+        // HEADER
         let thPeriode = document.createElement('th');
-        thPeriode.className = `bg-[#f7f7f7] dark:bg-gristDarkPanel text-[#929299] dark:text-gristDarkMuted text-[11px] uppercase tracking-wider font-semibold border border-[#d9d9d9] dark:border-gristDarkBorder p-2 text-center min-w-[${widthPeriode}] w-[${widthPeriode}] sticky left-0 z-40 transition-colors duration-200`;
-        thPeriode.style.minWidth = widthPeriode;
-        thPeriode.style.width = widthPeriode;
+        thPeriode.className = "bg-[#f7f7f7] dark:bg-gristDarkPanel text-[#929299] dark:text-gristDarkMuted text-[11px] uppercase tracking-wider font-semibold border border-[#d9d9d9] dark:border-gristDarkBorder p-2 text-center min-w-[150px] w-[150px] sticky left-0 z-40 transition-colors duration-200";
         thPeriode.innerText = "Periode";
         this.els.thead.appendChild(thPeriode);
 
-        // 2. Kolom Source
-        let thSource = document.createElement('th');
-        thSource.className = `bg-[#f7f7f7] dark:bg-gristDarkPanel text-[#929299] dark:text-gristDarkMuted text-[11px] uppercase tracking-wider font-semibold border border-[#d9d9d9] dark:border-gristDarkBorder p-2 text-left min-w-[${widthSource}] w-[${widthSource}] sticky left-[${leftOffsetSource}] sticky-shadow z-40 transition-colors duration-200`;
-        thSource.style.minWidth = widthSource;
-        thSource.style.width = widthSource;
-        thSource.style.left = leftOffsetSource;
-        thSource.innerText = "Source";
-        this.els.thead.appendChild(thSource);
+        let thDepartment = document.createElement('th');
+        thDepartment.className = "bg-[#f7f7f7] dark:bg-gristDarkPanel text-[#929299] dark:text-gristDarkMuted text-[11px] uppercase tracking-wider font-semibold border border-[#d9d9d9] dark:border-gristDarkBorder p-2 text-left min-w-[160px] w-[160px] sticky left-[150px] sticky-shadow z-40 transition-colors duration-200";
+        thDepartment.innerText = "Department";
+        this.els.thead.appendChild(thDepartment);
 
-        // 3. Header Metrik Dinamis
         Config.metricColumns.forEach(metric => {
             let th = document.createElement('th');
             th.className = `bg-[#f7f7f7] dark:bg-gristDarkPanel text-[#929299] dark:text-gristDarkMuted text-[11px] uppercase tracking-wider font-semibold border border-[#d9d9d9] dark:border-gristDarkBorder p-2 text-right z-30 transition-colors duration-200 ${metric.isHighlight ? 'text-blue-600 dark:text-blue-400' : ''}`;
@@ -70,7 +56,7 @@ const UIManager = {
             this.els.thead.appendChild(th);
         });
 
-        // --- BODY ---
+        // BODY
         if (AppState.allRecords.length === 0) {
             let tr = document.createElement('tr');
             tr.innerHTML = `<td colspan="${2 + Config.metricColumns.length}" class="p-4 text-center text-gray-500">Belum ada data. Silakan klik 'Tambah Baris'.</td>`;
@@ -83,20 +69,17 @@ const UIManager = {
             tr.className = "hover:bg-blue-50/20 dark:hover:bg-white/5 transition-colors duration-150 group";
             const isNewRow = String(record.id).startsWith('new_');
 
-            // 1. Cell Periode
+            // 1. CELL PERIODE (DATE PICKER)
             let tdPeriode = document.createElement('td');
             tdPeriode.className = "p-0 relative border border-[#d9d9d9] dark:border-gristDarkBorder sticky left-0 z-20 transition-colors duration-200 bg-white dark:bg-gristDarkBg group-hover:bg-blue-50/20 dark:group-hover:bg-[#343442]";
-            tdPeriode.style.minWidth = widthPeriode;
-            tdPeriode.style.width = widthPeriode;
 
             const keyPeriode = `${record.id}|${Config.colPeriode}`;
-            let dbPeriode = DateUtil.parse(record[Config.colPeriode]) || '';
+            let dbPeriode = DateUtil.formatForMonthPicker(record[Config.colPeriode]) || '';
             let valPeriode = AppState.unsavedEdits[keyPeriode] !== undefined ? AppState.unsavedEdits[keyPeriode] : dbPeriode;
 
             let inputPeriode = document.createElement('input');
-            inputPeriode.type = 'text';
-            inputPeriode.placeholder = 'Mei 24';
-            inputPeriode.className = "block w-full h-full min-h-[36px] px-2 text-center text-[13px] text-[#262633] dark:text-gristDarkText font-medium bg-transparent focus:outline-none focus:ring-0 focus:shadow-[inset_0_0_0_2px_#1f78d1] focus:bg-blue-50/30 dark:focus:bg-[#1f78d1]/20 transition-none";
+            inputPeriode.type = 'month'; // MENGGUNAKAN MONTH PICKER BAWAAN BROWSER
+            inputPeriode.className = "block w-full h-full min-h-[36px] px-3 text-center text-[13px] text-[#262633] dark:text-gristDarkText font-medium bg-transparent focus:outline-none focus:ring-0 focus:shadow-[inset_0_0_0_2px_#1f78d1] focus:bg-blue-50/30 dark:focus:bg-[#1f78d1]/20 transition-none cursor-pointer";
             if (isNewRow && !valPeriode) inputPeriode.classList.add('bg-yellow-50', 'dark:bg-yellow-900/20');
             inputPeriode.value = valPeriode;
 
@@ -107,45 +90,41 @@ const UIManager = {
             tdPeriode.appendChild(inputPeriode);
             tr.appendChild(tdPeriode);
 
-            // 2. Cell Source
-            let tdSource = document.createElement('td');
-            tdSource.className = "p-0 relative border border-[#d9d9d9] dark:border-gristDarkBorder sticky sticky-shadow z-20 transition-colors duration-200 bg-white dark:bg-gristDarkBg group-hover:bg-blue-50/20 dark:group-hover:bg-[#343442]";
-            tdSource.style.minWidth = widthSource;
-            tdSource.style.width = widthSource;
-            tdSource.style.left = leftOffsetSource;
+            // 2. CELL Department (DROPDOWN)
+            let tdDepartment = document.createElement('td');
+            tdDepartment.className = "p-0 relative border border-[#d9d9d9] dark:border-gristDarkBorder sticky left-[150px] sticky-shadow z-20 transition-colors duration-200 bg-white dark:bg-gristDarkBg group-hover:bg-blue-50/20 dark:group-hover:bg-[#343442]";
 
-            const keySource = `${record.id}|${Config.colSource}`;
-            let dbSource = ValUtil.getChoiceVal(record[Config.colSource]) || '';
-            let valSource = AppState.unsavedEdits[keySource] !== undefined ? AppState.unsavedEdits[keySource] : dbSource;
+            const keyDepartment = `${record.id}|${Config.colDepartment}`;
+            let dbDepartment = ValUtil.getChoiceVal(record[Config.colDepartment]) || '';
+            let valDepartment = AppState.unsavedEdits[keyDepartment] !== undefined ? AppState.unsavedEdits[keyDepartment] : dbDepartment;
 
-            let selectSource = document.createElement('select');
-            selectSource.className = "block w-full h-full min-h-[36px] px-2 text-left text-[13px] text-[#262633] dark:text-gristDarkText font-medium bg-transparent focus:outline-none focus:ring-0 focus:shadow-[inset_0_0_0_2px_#1f78d1] focus:bg-blue-50/30 dark:focus:bg-[#1f78d1]/20 transition-none cursor-pointer outline-none";
-            if (isNewRow && !valSource) selectSource.classList.add('bg-yellow-50', 'dark:bg-yellow-900/20');
+            let selectDepartment = document.createElement('select');
+            selectDepartment.className = "block w-full h-full min-h-[36px] px-2 text-left text-[13px] text-[#262633] dark:text-gristDarkText font-medium bg-transparent focus:outline-none focus:ring-0 focus:shadow-[inset_0_0_0_2px_#1f78d1] focus:bg-blue-50/30 dark:focus:bg-[#1f78d1]/20 transition-none cursor-pointer outline-none";
+            if (isNewRow && !valDepartment) selectDepartment.classList.add('bg-yellow-50', 'dark:bg-yellow-900/20');
 
             let defaultOpt = document.createElement('option');
             defaultOpt.value = "";
-            defaultOpt.text = "- Pilih Source -";
+            defaultOpt.text = "- Pilih Department -";
             defaultOpt.disabled = true;
-            if (!valSource) defaultOpt.selected = true;
-            selectSource.appendChild(defaultOpt);
+            if (!valDepartment) defaultOpt.selected = true;
+            selectDepartment.appendChild(defaultOpt);
 
-            AppState.uniqueSources.forEach(src => {
+            AppState.uniqueDepartments.forEach(src => {
                 let opt = document.createElement('option');
-                opt.value = src;
-                opt.text = src;
+                opt.value = src; opt.text = src;
                 opt.className = "text-[#262633] dark:text-white bg-white dark:bg-gristDarkBg";
-                if (src === valSource) opt.selected = true;
-                selectSource.appendChild(opt);
+                if (src === valDepartment) opt.selected = true;
+                selectDepartment.appendChild(opt);
             });
 
-            selectSource.addEventListener('change', (e) => {
-                AppState.unsavedEdits[keySource] = e.target.value;
-                if (e.target.value) selectSource.classList.remove('bg-yellow-50', 'dark:bg-yellow-900/20');
+            selectDepartment.addEventListener('change', (e) => {
+                AppState.unsavedEdits[keyDepartment] = e.target.value;
+                if (e.target.value) selectDepartment.classList.remove('bg-yellow-50', 'dark:bg-yellow-900/20');
             });
-            tdSource.appendChild(selectSource);
-            tr.appendChild(tdSource);
+            tdDepartment.appendChild(selectDepartment);
+            tr.appendChild(tdDepartment);
 
-            // 3. Cells Metrik Dinamis
+            // 3. CELLS METRIK NUMERIK
             Config.metricColumns.forEach(metric => {
                 let td = document.createElement('td');
                 td.className = "p-0 relative h-full border border-[#d9d9d9] dark:border-gristDarkBorder bg-white dark:bg-gristDarkBg group-hover:bg-transparent transition-colors duration-200";
@@ -160,10 +139,7 @@ const UIManager = {
                 input.className = `block w-full h-full min-h-[36px] px-2 font-mono text-right text-[13px] bg-transparent focus:outline-none focus:ring-0 focus:shadow-[inset_0_0_0_2px_#1f78d1] focus:bg-blue-50/30 dark:focus:bg-[#1f78d1]/20 transition-none ${metric.isHighlight ? 'text-blue-700 font-semibold dark:text-blue-300' : 'text-[#262633] dark:text-gristDarkText'}`;
                 input.value = finalVal;
 
-                input.addEventListener('input', (e) => {
-                    AppState.unsavedEdits[editKey] = e.target.value;
-                });
-
+                input.addEventListener('input', (e) => AppState.unsavedEdits[editKey] = e.target.value);
                 td.appendChild(input);
                 tr.appendChild(td);
             });

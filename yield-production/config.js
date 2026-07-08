@@ -1,7 +1,7 @@
 const Config = {
     tableId: 'Yield_Production_metric__monthly',
     colPeriode: 'periode',
-    colSource: 'source',
+    colDepartment: 'department',
 
     // Daftar lengkap kolom numerik OEE secara berurutan (Kiri ke Kanan)
     metricColumns: [
@@ -13,7 +13,7 @@ const Config = {
 
 const AppState = {
     allRecords: [],
-    uniqueSources: [], // Menyimpan daftar Dropdown Source
+    uniqueDepartments: [], // Menyimpan daftar Dropdown Department
     unsavedEdits: {},
     newRecordCounter: 1
 };

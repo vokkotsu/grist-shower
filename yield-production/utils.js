@@ -1,50 +1,53 @@
 const DateUtil = {
-    monthNamesShort: ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"],
-    parse(val) {
-        if (!val) return '';
-        try {
-            if (Array.isArray(val) && val[0] === 'd' && typeof val[1] === 'number') {
-                return this._formatShort(new Date(val[1] * 1000));
-            }
-            if (typeof val === 'number') {
-                return this._formatShort(new Date(val > 100000000000 ? val : val * 1000));
-            }
-            if (typeof val === 'string') {
-                let d = new Date(val);
-                if (!isNaN(d.getTime())) return this._formatShort(d);
-            }
-        } catch (e) { console.error(e); }
-        return String(val);
-    },
-    _formatShort(dateObj) {
-        return this.monthNamesShort[dateObj.getUTCMonth()] + ' ' + String(dateObj.getUTCFullYear()).slice(-2);
-    },
-    toGristString(uiStr) {
-        if (!uiStr) return null;
-        let str = String(uiStr).trim();
+    // Mengubah nilai mentah dari Grist menjadi format solid "YYYY-MM"
+    formatForMonthPicker(val) {
+        if (val === null || val === undefined || val === '') return '';
 
-        // Jika user mengetik YYYY-MM-DD
-        if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
-        // Jika user mengetik YYYY-MM
-        if (/^\d{4}-\d{2}$/.test(str)) return `${str}-01`;
+        let strVal = String(val).trim();
 
-        // Jika user mengetik format 'Jan 24'
-        let parts = str.split(/[\s-]/);
+        // 1. Ekstraksi aman dari string beraroma YYYY-MM atau YYYY-MM-DD (Paling akurat)
+        const yyyymmMatch = strVal.match(/^(\d{4})-(\d{2})/);
+        if (yyyymmMatch) return `${yyyymmMatch[1]}-${yyyymmMatch[2]}`;
+
+        // 2. Ekstraksi jika Grist mengirimkan teks bulan lama (Misal: "Mei 24" atau "May 2024")
+        const monthMap = { "jan": "01", "feb": "02", "mar": "03", "apr": "04", "mei": "05", "may": "05", "jun": "06", "jul": "07", "agu": "08", "aug": "08", "sep": "09", "okt": "10", "oct": "10", "nov": "11", "des": "12", "dec": "12" };
+        let parts = strVal.toLowerCase().split(/[\s-]/);
         if (parts.length >= 2) {
-            let mIndex = this.monthNamesShort.findIndex(m => m.toLowerCase() === parts[0].toLowerCase());
-            if (mIndex !== -1) {
+            let mStr = parts[0];
+            if (monthMap[mStr]) {
                 let y = parts[parts.length - 1];
                 if (y.length === 2) y = "20" + y;
-                let m = String(mIndex + 1).padStart(2, '0');
-                return `${y}-${m}-01`;
+                return `${y}-${monthMap[mStr]}`;
             }
         }
 
-        // Fallback Date parser
-        let d = new Date(str);
-        if (!isNaN(d.getTime())) return d.toISOString().split('T')[0];
+        // 3. Fallback jika Grist mengirimkan murni Timestamp UNIX
+        try {
+            let d;
+            if (Array.isArray(val) && val[0] === 'd' && typeof val[1] === 'number') {
+                d = new Date(val[1] * 1000);
+            } else if (typeof val === 'number') {
+                d = new Date(val > 100000000000 ? val : val * 1000);
+            } else {
+                d = new Date(strVal);
+            }
 
-        return str;
+            if (d && !isNaN(d.getTime())) {
+                // Memastikan penggunaan tahun lokal agar zona waktu tidak menggeser bulan secara tidak sengaja
+                const yyyy = d.getFullYear();
+                const mm = String(d.getMonth() + 1).padStart(2, '0');
+                return `${yyyy}-${mm}`;
+            }
+        } catch (e) { console.error("Gagal format tanggal Grist:", val, e); }
+
+        return '';
+    },
+
+    // Mengubah kembali "YYYY-MM" dari Date Picker menjadi string utuh untuk disimpan ke Grist
+    toGristString(uiMonthStr) {
+        if (!uiMonthStr) return null;
+        // Asumsikan tanggal 01 pada bulan tersebut (YYYY-MM-01) agar terbaca sebagai Format Date baku
+        return `${uiMonthStr}-01`;
     }
 };
 
