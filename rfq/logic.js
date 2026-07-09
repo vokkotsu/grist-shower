@@ -92,12 +92,8 @@ const BusinessLogic = {
 
             if (!groupedUpdates[recordId]) groupedUpdates[recordId] = {};
 
-            // --- PERUBAHAN DI SINI ---
-            if (fieldId === Config.colPeriode) {
+            if (fieldId === Config.colPeriode || fieldId === Config.colSource) {
                 groupedUpdates[recordId][fieldId] = rawVal;
-            } else if (fieldId === Config.colSource) {
-                // Aktifkan formatForSave dengan argumen `true` untuk tipe Choice List
-                groupedUpdates[recordId][fieldId] = ValUtil.formatForSave(rawVal, true);
             } else {
                 groupedUpdates[recordId][fieldId] = rawVal === '' ? null : Number(rawVal);
             }

@@ -90,70 +90,38 @@ const UIManager = {
             tdPeriode.appendChild(inputPeriode);
             tr.appendChild(tdPeriode);
 
-            // 2. CELL Department (CHECKBOXES)
+            // 2. CELL Department (DROPDOWN)
             let tdDepartment = document.createElement('td');
             tdDepartment.className = "p-0 relative border border-[#d9d9d9] dark:border-gristDarkBorder sticky left-[150px] sticky-shadow z-20 transition-colors duration-200 bg-white dark:bg-gristDarkBg group-hover:bg-blue-50/20 dark:group-hover:bg-[#343442]";
 
             const keyDepartment = `${record.id}|${Config.colDepartment}`;
-
-            // PERBAIKAN: Ekstrak seluruh pilihan Array dari Grist jika tipe datanya berupa Choice List ('L')
-            let rawDepartment = record[Config.colDepartment];
-            let dbDepartment = '';
-            if (Array.isArray(rawDepartment) && rawDepartment[0] === 'L') {
-                dbDepartment = rawDepartment.slice(1).join(', '); // Menarik seluruh isi array pilihan tanpa terpotong
-            } else {
-                dbDepartment = ValUtil.getChoiceVal(rawDepartment) || ''; // Fallback ke metode lama untuk Choice biasa
-            }
-
+            let dbDepartment = ValUtil.getChoiceVal(record[Config.colDepartment]) || '';
             let valDepartment = AppState.unsavedEdits[keyDepartment] !== undefined ? AppState.unsavedEdits[keyDepartment] : dbDepartment;
 
-            // Membuat kontainer yang bisa di-scroll untuk daftar checkbox
-            let checkboxContainer = document.createElement('div');
-            checkboxContainer.className = "w-full h-full min-h-[60px] max-h-[100px] px-2 py-1 text-left text-[12px] font-medium bg-transparent focus:outline-none transition-none overflow-y-auto flex flex-col gap-1";
-            if (isNewRow && !valDepartment) checkboxContainer.classList.add('bg-yellow-50', 'dark:bg-yellow-900/20');
+            let selectDepartment = document.createElement('select');
+            selectDepartment.className = "block w-full h-full min-h-[36px] px-2 text-left text-[13px] text-[#262633] dark:text-gristDarkText font-medium bg-transparent focus:outline-none focus:ring-0 focus:shadow-[inset_0_0_0_2px_#1f78d1] focus:bg-blue-50/30 dark:focus:bg-[#1f78d1]/20 transition-none cursor-pointer outline-none";
+            if (isNewRow && !valDepartment) selectDepartment.classList.add('bg-yellow-50', 'dark:bg-yellow-900/20');
 
-            // Pecah data yang sudah tersimpan menjadi array (agar bisa dicocokkan dengan checkbox)
-            const activeVals = valDepartment.split(',').map(s => s.trim()).filter(Boolean);
+            let defaultOpt = document.createElement('option');
+            defaultOpt.value = "";
+            defaultOpt.text = "- Pilih Department -";
+            defaultOpt.disabled = true;
+            if (!valDepartment) defaultOpt.selected = true;
+            selectDepartment.appendChild(defaultOpt);
 
             AppState.uniqueDepartments.forEach(src => {
-                // Label pembungkus agar area klik lebih luas
-                let label = document.createElement('label');
-                label.className = "flex items-center gap-1.5 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 p-0.5 rounded";
-
-                let checkbox = document.createElement('input');
-                checkbox.type = "checkbox";
-                checkbox.value = src;
-                checkbox.className = "w-3 h-3 text-[#16b378] bg-gray-100 border-gray-300 rounded focus:ring-[#16b378] dark:focus:ring-[#139a67] focus:ring-2 dark:bg-gray-700 dark:border-gray-600 cursor-pointer";
-
-                // Centang secara otomatis jika nilainya ada di database atau status memori
-                if (activeVals.includes(src)) checkbox.checked = true;
-
-                checkbox.addEventListener('change', () => {
-                    // Ambil semua checkbox yang dalam keadaan tercentang di dalam kontainer baris ini
-                    const checkedBoxes = Array.from(checkboxContainer.querySelectorAll('input[type="checkbox"]:checked'));
-                    const selectedOptions = checkedBoxes.map(cb => cb.value);
-
-                    // Simpan sebagai string yang dipisahkan koma untuk Payload Grist
-                    AppState.unsavedEdits[keyDepartment] = selectedOptions.join(', ');
-
-                    // Manipulasi UI warna peringatan jika kosong
-                    if (selectedOptions.length > 0) {
-                        checkboxContainer.classList.remove('bg-yellow-50', 'dark:bg-yellow-900/20');
-                    } else if (isNewRow) {
-                        checkboxContainer.classList.add('bg-yellow-50', 'dark:bg-yellow-900/20');
-                    }
-                });
-
-                let span = document.createElement('span');
-                span.innerText = src;
-                span.className = "text-[#262633] dark:text-white leading-tight mt-[1px]";
-
-                label.appendChild(checkbox);
-                label.appendChild(span);
-                checkboxContainer.appendChild(label);
+                let opt = document.createElement('option');
+                opt.value = src; opt.text = src;
+                opt.className = "text-[#262633] dark:text-white bg-white dark:bg-gristDarkBg";
+                if (src === valDepartment) opt.selected = true;
+                selectDepartment.appendChild(opt);
             });
 
-            tdDepartment.appendChild(checkboxContainer);
+            selectDepartment.addEventListener('change', (e) => {
+                AppState.unsavedEdits[keyDepartment] = e.target.value;
+                if (e.target.value) selectDepartment.classList.remove('bg-yellow-50', 'dark:bg-yellow-900/20');
+            });
+            tdDepartment.appendChild(selectDepartment);
             tr.appendChild(tdDepartment);
 
             // 3. CELLS METRIK NUMERIK

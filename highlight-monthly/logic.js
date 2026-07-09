@@ -33,7 +33,7 @@ const BusinessLogic = {
             AppState.allRecords = [];
             // Walaupun tabel kosong, kita tetap mencoba menarik daftar choice dari metadata kolom
             let metadataChoices = await this.fetchChoicesFromMetadata(Config.tableId, Config.colDepartment);
-            AppState.uniquede = metadataChoices || [];
+            AppState.uniqueDepartments = metadataChoices || [];
             UIManager.renderTable();
             return;
         }
@@ -92,14 +92,10 @@ const BusinessLogic = {
 
             if (!groupedUpdates[recordId]) groupedUpdates[recordId] = {};
 
-            // --- PERUBAHAN DI SINI ---
-            if (fieldId === Config.colPeriode) {
+            if (fieldId === Config.colPeriode || fieldId === Config.colDepartment) {
                 groupedUpdates[recordId][fieldId] = rawVal;
-            } else if (fieldId === Config.colDepartment) {
-                // Aktifkan formatForSave dengan argumen `true` untuk tipe Choice List
-                groupedUpdates[recordId][fieldId] = ValUtil.formatForSave(rawVal, true);
             } else {
-                groupedUpdates[recordId][fieldId] = rawVal === '' ? null : String(rawVal);
+                groupedUpdates[recordId][fieldId] = rawVal === '' ? null : Number(rawVal);
             }
         }
 

@@ -52,28 +52,8 @@ const DateUtil = {
 };
 
 const ValUtil = {
-    // Membaca data dari Grist dan menampilkannya ke HTML
     getChoiceVal(val) {
-        if (Array.isArray(val)) {
-            // Jika Grist mengirimkan format Choice List (selalu diawali huruf 'L')
-            if (val[0] === 'L') {
-                return val.slice(1).join(', '); // Ubah ['L', 'A', 'B'] menjadi "A, B"
-            }
-            // Jika ini Reference atau Choice biasa
-            if (val.length > 1) return String(val[1]);
-        }
-        return val ? String(val) : '';
-    },
-
-    // Format data dari HTML kembali ke Grist saat tombol Simpan ditekan
-    formatForSave(uiVal, isChoiceList) {
-        if (!uiVal) return isChoiceList ? ['L'] : null; // Kirim array 'L' kosong jika dihapus
-
-        if (isChoiceList) {
-            // Pecah string "A, B" menjadi array ['L', 'A', 'B'] yang dimengerti Grist
-            const parts = String(uiVal).split(',').map(s => s.trim()).filter(Boolean);
-            return ['L', ...parts];
-        }
-        return String(uiVal);
+        if (Array.isArray(val) && val.length > 1) return String(val[1]);
+        return val;
     }
 };
