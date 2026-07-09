@@ -54,7 +54,8 @@ const BusinessLogic = {
             if (fieldId === Config.colPeriode || fieldId === Config.colDepartment) {
                 groupedUpdates[recordId][fieldId] = rawVal;
             } else {
-                groupedUpdates[recordId][fieldId] = rawVal === '' ? null : Text(rawVal);
+                // MENGGANTI Text() MENJADI String() AGAR JAVASCRIPT TIDAK CRASH
+                groupedUpdates[recordId][fieldId] = rawVal === '' ? null : String(rawVal);
             }
         }
 
