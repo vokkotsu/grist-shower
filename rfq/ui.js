@@ -90,7 +90,7 @@ const UIManager = {
             tdPeriode.appendChild(inputPeriode);
             tr.appendChild(tdPeriode);
 
-            // 2. CELL SOURCE (DROPDOWN)
+            // 2. CELL SOURCE (CHECKBOXES)
             let tdSource = document.createElement('td');
             tdSource.className = "p-0 relative border border-[#d9d9d9] dark:border-gristDarkBorder sticky left-[150px] sticky-shadow z-20 transition-colors duration-200 bg-white dark:bg-gristDarkBg group-hover:bg-blue-50/20 dark:group-hover:bg-[#343442]";
 
@@ -98,40 +98,53 @@ const UIManager = {
             let dbSource = ValUtil.getChoiceVal(record[Config.colSource]) || '';
             let valSource = AppState.unsavedEdits[keySource] !== undefined ? AppState.unsavedEdits[keySource] : dbSource;
 
-            let selectSource = document.createElement('select');
+            // Membuat kontainer yang bisa di-scroll untuk daftar checkbox
+            let checkboxContainer = document.createElement('div');
+            checkboxContainer.className = "w-full h-full min-h-[60px] max-h-[100px] px-2 py-1 text-left text-[12px] font-medium bg-transparent focus:outline-none transition-none overflow-y-auto flex flex-col gap-1";
+            if (isNewRow && !valSource) checkboxContainer.classList.add('bg-yellow-50', 'dark:bg-yellow-900/20');
 
-            // --- AKTIFKAN FITUR HTML MULTIPLE SELECTION ---
-            selectSource.multiple = true;
-
-            // Perbarui tinggi kolom agar pilihan list box bisa muat
-            selectSource.className = "block w-full h-full min-h-[60px] px-2 py-1 text-left text-[12px] text-[#262633] dark:text-gristDarkText font-medium bg-transparent focus:outline-none focus:ring-0 focus:shadow-[inset_0_0_0_2px_#1f78d1] focus:bg-blue-50/30 dark:focus:bg-[#1f78d1]/20 transition-none cursor-pointer outline-none overflow-y-auto";
-            if (isNewRow && !valSource) selectSource.classList.add('bg-yellow-50', 'dark:bg-yellow-900/20');
-
-            // Pecah data yang sudah tersimpan menjadi array ("A, B" -> ["A", "B"])
-            const activeVals = valSource.split(',').map(s => s.trim());
+            // Pecah data yang sudah tersimpan menjadi array (agar bisa dicocokkan dengan checkbox)
+            const activeVals = valSource.split(',').map(s => s.trim()).filter(Boolean);
 
             AppState.uniqueSources.forEach(src => {
-                let opt = document.createElement('option');
-                opt.value = src; opt.text = src;
-                opt.className = "text-[#262633] dark:text-white bg-white dark:bg-gristDarkBg p-1 mb-0.5 rounded";
-                // Sorot semua pilihan yang ada di dalam database
-                if (activeVals.includes(src)) opt.selected = true;
-                selectSource.appendChild(opt);
+                // Label pembungkus agar area klik lebih luas
+                let label = document.createElement('label');
+                label.className = "flex items-center gap-1.5 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 p-0.5 rounded";
+
+                let checkbox = document.createElement('input');
+                checkbox.type = "checkbox";
+                checkbox.value = src;
+                checkbox.className = "w-3 h-3 text-[#16b378] bg-gray-100 border-gray-300 rounded focus:ring-[#16b378] dark:focus:ring-[#139a67] focus:ring-2 dark:bg-gray-700 dark:border-gray-600 cursor-pointer";
+
+                // Centang secara otomatis jika nilainya ada di database atau status memori
+                if (activeVals.includes(src)) checkbox.checked = true;
+
+                checkbox.addEventListener('change', () => {
+                    // Ambil semua checkbox yang dalam keadaan tercentang di dalam kontainer baris ini
+                    const checkedBoxes = Array.from(checkboxContainer.querySelectorAll('input[type="checkbox"]:checked'));
+                    const selectedOptions = checkedBoxes.map(cb => cb.value);
+
+                    // Simpan sebagai string yang dipisahkan koma untuk Payload Grist
+                    AppState.unsavedEdits[keySource] = selectedOptions.join(', ');
+
+                    // Manipulasi UI warna peringatan jika kosong
+                    if (selectedOptions.length > 0) {
+                        checkboxContainer.classList.remove('bg-yellow-50', 'dark:bg-yellow-900/20');
+                    } else if (isNewRow) {
+                        checkboxContainer.classList.add('bg-yellow-50', 'dark:bg-yellow-900/20');
+                    }
+                });
+
+                let span = document.createElement('span');
+                span.innerText = src;
+                span.className = "text-[#262633] dark:text-white leading-tight mt-[1px]";
+
+                label.appendChild(checkbox);
+                label.appendChild(span);
+                checkboxContainer.appendChild(label);
             });
 
-            selectSource.addEventListener('change', (e) => {
-                // Ambil SEMUA nilai yang disorot oleh pengguna
-                const selectedOptions = Array.from(e.target.selectedOptions).map(opt => opt.value);
-                // Simpan ke memori sebagai string koma ("Pilihan 1, Pilihan 2")
-                AppState.unsavedEdits[keySource] = selectedOptions.join(', ');
-
-                if (selectedOptions.length > 0) {
-                    selectSource.classList.remove('bg-yellow-50', 'dark:bg-yellow-900/20');
-                } else if (isNewRow) {
-                    selectSource.classList.add('bg-yellow-50', 'dark:bg-yellow-900/20');
-                }
-            });
-            tdSource.appendChild(selectSource);
+            tdSource.appendChild(checkboxContainer);
             tr.appendChild(tdSource);
 
             // 3. CELLS METRIK NUMERIK
