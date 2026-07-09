@@ -5,9 +5,9 @@ const Config = {
 
     // Daftar lengkap kolom numerik OEE secara berurutan (Kiri ke Kanan)
     metricColumns: [
-        { id: 'subject', label: 'Subject', width: '90px' },
-        { id: 'implication', label: 'Implication', width: '90px' },
-        { id: 'action_plan', label: 'Action Plan', width: '90px' }
+        { id: 'subject', label: 'subject', width: '90px' },
+        { id: 'implication', label: 'implication', width: '90px' },
+        { id: 'action_plan', label: 'action plan', width: '90px' }
     ]
 };
 

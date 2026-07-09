@@ -5,8 +5,8 @@ const Config = {
 
     // Daftar lengkap kolom numerik OEE secara berurutan (Kiri ke Kanan)
     metricColumns: [
-        { id: 'rfq', label: 'RFQ (KG)', width: '90px' },
-        { id: 'rft', label: 'RFT (KG)', width: '90px' }
+        { id: 'rfq', label: 'rfq', width: '90px' },
+        { id: 'rft', label: 'rft', width: '90px' }
     ]
 };
 
