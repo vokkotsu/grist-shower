@@ -52,34 +52,28 @@ const DateUtil = {
 };
 
 const ValUtil = {
-    // Fungsi membaca data dari Grist ke HTML (Read)
+    // Membaca data dari Grist dan menampilkannya ke HTML
     getChoiceVal(val) {
-        if (!val) return '';
-
-        // Jika tipe datanya array
         if (Array.isArray(val)) {
-            // Jika elemen pertama adalah 'L' (Choice List)
+            // Jika Grist mengirimkan format Choice List (selalu diawali huruf 'L')
             if (val[0] === 'L') {
-                // Ambil sisa array dan gabungkan dengan koma
-                return val.slice(1).join(', ');
+                return val.slice(1).join(', '); // Ubah ['L', 'A', 'B'] menjadi "A, B"
             }
-            // Jika tipe Reference List biasa (Reference ID)
+            // Jika ini Reference atau Choice biasa
             if (val.length > 1) return String(val[1]);
         }
-
-        return String(val); // Jika tipe data Choice biasa (teks string)
+        return val ? String(val) : '';
     },
 
-    // Fungsi baru: Memformat string HTML untuk dikirim ke Grist (Write)
-    formatForSave(uiVal, isChoiceList = false) {
-        if (!uiVal) return isChoiceList ? ['L'] : null;
+    // Format data dari HTML kembali ke Grist saat tombol Simpan ditekan
+    formatForSave(uiVal, isChoiceList) {
+        if (!uiVal) return isChoiceList ? ['L'] : null; // Kirim array 'L' kosong jika dihapus
 
         if (isChoiceList) {
-            // Ubah "Mesin A, Mesin B" menjadi ['L', 'Mesin A', 'Mesin B']
-            const items = uiVal.split(',').map(item => item.trim()).filter(Boolean);
-            return ['L', ...items];
+            // Pecah string "A, B" menjadi array ['L', 'A', 'B'] yang dimengerti Grist
+            const parts = String(uiVal).split(',').map(s => s.trim()).filter(Boolean);
+            return ['L', ...parts];
         }
-
         return String(uiVal);
     }
 };

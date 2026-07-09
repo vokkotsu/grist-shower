@@ -99,27 +99,37 @@ const UIManager = {
             let valSource = AppState.unsavedEdits[keySource] !== undefined ? AppState.unsavedEdits[keySource] : dbSource;
 
             let selectSource = document.createElement('select');
-            selectSource.className = "block w-full h-full min-h-[36px] px-2 text-left text-[13px] text-[#262633] dark:text-gristDarkText font-medium bg-transparent focus:outline-none focus:ring-0 focus:shadow-[inset_0_0_0_2px_#1f78d1] focus:bg-blue-50/30 dark:focus:bg-[#1f78d1]/20 transition-none cursor-pointer outline-none";
+
+            // --- AKTIFKAN FITUR HTML MULTIPLE SELECTION ---
+            selectSource.multiple = true;
+
+            // Perbarui tinggi kolom agar pilihan list box bisa muat
+            selectSource.className = "block w-full h-full min-h-[60px] px-2 py-1 text-left text-[12px] text-[#262633] dark:text-gristDarkText font-medium bg-transparent focus:outline-none focus:ring-0 focus:shadow-[inset_0_0_0_2px_#1f78d1] focus:bg-blue-50/30 dark:focus:bg-[#1f78d1]/20 transition-none cursor-pointer outline-none overflow-y-auto";
             if (isNewRow && !valSource) selectSource.classList.add('bg-yellow-50', 'dark:bg-yellow-900/20');
 
-            let defaultOpt = document.createElement('option');
-            defaultOpt.value = "";
-            defaultOpt.text = "- Pilih Source -";
-            defaultOpt.disabled = true;
-            if (!valSource) defaultOpt.selected = true;
-            selectSource.appendChild(defaultOpt);
+            // Pecah data yang sudah tersimpan menjadi array ("A, B" -> ["A", "B"])
+            const activeVals = valSource.split(',').map(s => s.trim());
 
             AppState.uniqueSources.forEach(src => {
                 let opt = document.createElement('option');
                 opt.value = src; opt.text = src;
-                opt.className = "text-[#262633] dark:text-white bg-white dark:bg-gristDarkBg";
-                if (src === valSource) opt.selected = true;
+                opt.className = "text-[#262633] dark:text-white bg-white dark:bg-gristDarkBg p-1 mb-0.5 rounded";
+                // Sorot semua pilihan yang ada di dalam database
+                if (activeVals.includes(src)) opt.selected = true;
                 selectSource.appendChild(opt);
             });
 
             selectSource.addEventListener('change', (e) => {
-                AppState.unsavedEdits[keySource] = e.target.value;
-                if (e.target.value) selectSource.classList.remove('bg-yellow-50', 'dark:bg-yellow-900/20');
+                // Ambil SEMUA nilai yang disorot oleh pengguna
+                const selectedOptions = Array.from(e.target.selectedOptions).map(opt => opt.value);
+                // Simpan ke memori sebagai string koma ("Pilihan 1, Pilihan 2")
+                AppState.unsavedEdits[keySource] = selectedOptions.join(', ');
+
+                if (selectedOptions.length > 0) {
+                    selectSource.classList.remove('bg-yellow-50', 'dark:bg-yellow-900/20');
+                } else if (isNewRow) {
+                    selectSource.classList.add('bg-yellow-50', 'dark:bg-yellow-900/20');
+                }
             });
             tdSource.appendChild(selectSource);
             tr.appendChild(tdSource);
