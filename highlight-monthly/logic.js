@@ -33,7 +33,7 @@ const BusinessLogic = {
             AppState.allRecords = [];
             // Walaupun tabel kosong, kita tetap mencoba menarik daftar choice dari metadata kolom
             let metadataChoices = await this.fetchChoicesFromMetadata(Config.tableId, Config.colDepartment);
-            AppState.uniqueSources = metadataChoices || [];
+            AppState.uniqueDepartments = metadataChoices || [];
             UIManager.renderTable();
             return;
         }
@@ -58,11 +58,11 @@ const BusinessLogic = {
         let metadataChoices = await this.fetchChoicesFromMetadata(Config.tableId, Config.colDepartment);
 
         if (metadataChoices && metadataChoices.length > 0) {
-            AppState.uniqueSources = metadataChoices;
+            AppState.uniqueDepartments = metadataChoices;
         } else {
             // Fallback jika API Metadata gagal (tarik manual dari nilai yang sudah pernah diinput)
-            const sources = records.map(r => ValUtil.getChoiceVal(r[Config.colDepartment])).filter(Boolean);
-            AppState.uniqueSources = [...new Set(sources)].sort();
+            const departments = records.map(r => ValUtil.getChoiceVal(r[Config.colDepartment])).filter(Boolean);
+            AppState.uniqueDepartments = [...new Set(departments)].sort();
         }
 
         UIManager.renderTable();
