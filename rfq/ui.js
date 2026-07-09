@@ -95,7 +95,16 @@ const UIManager = {
             tdSource.className = "p-0 relative border border-[#d9d9d9] dark:border-gristDarkBorder sticky left-[150px] sticky-shadow z-20 transition-colors duration-200 bg-white dark:bg-gristDarkBg group-hover:bg-blue-50/20 dark:group-hover:bg-[#343442]";
 
             const keySource = `${record.id}|${Config.colSource}`;
-            let dbSource = ValUtil.getChoiceVal(record[Config.colSource]) || '';
+
+            // PERBAIKAN: Ekstrak seluruh pilihan Array dari Grist jika tipe datanya berupa Choice List ('L')
+            let rawSource = record[Config.colSource];
+            let dbSource = '';
+            if (Array.isArray(rawSource) && rawSource[0] === 'L') {
+                dbSource = rawSource.slice(1).join(', '); // Menarik seluruh isi array pilihan tanpa terpotong
+            } else {
+                dbSource = ValUtil.getChoiceVal(rawSource) || ''; // Fallback ke metode lama untuk Choice biasa
+            }
+
             let valSource = AppState.unsavedEdits[keySource] !== undefined ? AppState.unsavedEdits[keySource] : dbSource;
 
             // Membuat kontainer yang bisa di-scroll untuk daftar checkbox

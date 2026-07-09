@@ -95,7 +95,16 @@ const UIManager = {
             tdDepartment.className = "p-0 relative border border-[#d9d9d9] dark:border-gristDarkBorder sticky left-[150px] sticky-shadow z-20 transition-colors duration-200 bg-white dark:bg-gristDarkBg group-hover:bg-blue-50/20 dark:group-hover:bg-[#343442]";
 
             const keyDepartment = `${record.id}|${Config.colDepartment}`;
-            let dbDepartment = ValUtil.getChoiceVal(record[Config.colDepartment]) || '';
+
+            // PERBAIKAN: Ekstrak seluruh pilihan Array dari Grist jika tipe datanya berupa Choice List ('L')
+            let rawDepartment = record[Config.colDepartment];
+            let dbDepartment = '';
+            if (Array.isArray(rawDepartment) && rawDepartment[0] === 'L') {
+                dbDepartment = rawDepartment.slice(1).join(', '); // Menarik seluruh isi array pilihan tanpa terpotong
+            } else {
+                dbDepartment = ValUtil.getChoiceVal(rawDepartment) || ''; // Fallback ke metode lama untuk Choice biasa
+            }
+
             let valDepartment = AppState.unsavedEdits[keyDepartment] !== undefined ? AppState.unsavedEdits[keyDepartment] : dbDepartment;
 
             // Membuat kontainer yang bisa di-scroll untuk daftar checkbox
