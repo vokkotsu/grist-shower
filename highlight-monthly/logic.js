@@ -32,7 +32,7 @@ const BusinessLogic = {
         if (!records || records.length === 0) {
             AppState.allRecords = [];
             // Walaupun tabel kosong, kita tetap mencoba menarik daftar choice dari metadata kolom
-            let metadataChoices = await this.fetchChoicesFromMetadata(Config.tableId, Config.colSource);
+            let metadataChoices = await this.fetchChoicesFromMetadata(Config.tableId, Config.colDepartment);
             AppState.uniqueSources = metadataChoices || [];
             UIManager.renderTable();
             return;
@@ -43,25 +43,25 @@ const BusinessLogic = {
         const getActualCol = (confCol) => availableCols.find(c => c.toLowerCase() === confCol.toLowerCase()) || confCol;
 
         Config.colPeriode = getActualCol(Config.colPeriode);
-        Config.colSource = getActualCol(Config.colSource);
+        Config.colDepartment = getActualCol(Config.colDepartment);
         Config.metricColumns.forEach(m => m.id = getActualCol(m.id));
 
-        if (!(Config.colPeriode in sample) || (!(Config.colSource in sample))) {
+        if (!(Config.colPeriode in sample) || (!(Config.colDepartment in sample))) {
             let colsList = availableCols.filter(k => k !== 'id').join(', ');
-            UIManager.showError(`<b>Error Kolom:</b> Kolom '${Config.colPeriode}' atau '${Config.colSource}' tidak ditemukan.<br><br><b>Kolom yang terdeteksi:</b><br><span class="font-mono text-xs text-blue-600 bg-blue-50 p-2 rounded block mt-2 break-words leading-relaxed">${colsList}</span>`);
+            UIManager.showError(`<b>Error Kolom:</b> Kolom '${Config.colPeriode}' atau '${Config.colDepartment}' tidak ditemukan.<br><br><b>Kolom yang terdeteksi:</b><br><span class="font-mono text-xs text-blue-600 bg-blue-50 p-2 rounded block mt-2 break-words leading-relaxed">${colsList}</span>`);
             return;
         }
 
         AppState.allRecords = records;
 
         // FITUR BARU: Menarik pilihan langsung dari Setting Kolom Grist (Metadata)
-        let metadataChoices = await this.fetchChoicesFromMetadata(Config.tableId, Config.colSource);
+        let metadataChoices = await this.fetchChoicesFromMetadata(Config.tableId, Config.colDepartment);
 
         if (metadataChoices && metadataChoices.length > 0) {
             AppState.uniqueSources = metadataChoices;
         } else {
             // Fallback jika API Metadata gagal (tarik manual dari nilai yang sudah pernah diinput)
-            const sources = records.map(r => ValUtil.getChoiceVal(r[Config.colSource])).filter(Boolean);
+            const sources = records.map(r => ValUtil.getChoiceVal(r[Config.colDepartment])).filter(Boolean);
             AppState.uniqueSources = [...new Set(sources)].sort();
         }
 
@@ -72,7 +72,7 @@ const BusinessLogic = {
         const newRecord = {
             id: `new_${AppState.newRecordCounter++}`,
             [Config.colPeriode]: '',
-            [Config.colSource]: ''
+            [Config.colDepartment]: ''
         };
 
         Config.metricColumns.forEach(m => newRecord[m.id] = null);
@@ -92,7 +92,7 @@ const BusinessLogic = {
 
             if (!groupedUpdates[recordId]) groupedUpdates[recordId] = {};
 
-            if (fieldId === Config.colPeriode || fieldId === Config.colSource) {
+            if (fieldId === Config.colPeriode || fieldId === Config.colDepartment) {
                 groupedUpdates[recordId][fieldId] = rawVal;
             } else {
                 groupedUpdates[recordId][fieldId] = rawVal === '' ? null : String(rawVal);
@@ -109,7 +109,7 @@ const BusinessLogic = {
             }
 
             if (String(recordId).startsWith('new_')) {
-                if (changes[Config.colSource] && changes[Config.colPeriode]) {
+                if (changes[Config.colDepartment] && changes[Config.colPeriode]) {
                     apiActions.push(['AddRecord', Config.tableId, null, changes]);
                 }
             } else {
