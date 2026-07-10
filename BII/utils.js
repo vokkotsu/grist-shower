@@ -14,6 +14,9 @@ const DateUtil = {
     // Mengamankan nilai tanggal (YYYY-MM-DD) yang dikirim dari HTML Date Picker
     toGristDate(dateStr) {
         if (!dateStr) return null;
-        return dateStr; // Grist mengenali format standar ISO YYYY-MM-DD secara native
+
+        // Input type="date" sudah secara native menghasilkan string dengan format "YYYY-MM-DD"
+        // sehingga kita bisa langsung melemparnya ke Grist tanpa perlu ditambahkan "-01"
+        return dateStr;
     }
 };
