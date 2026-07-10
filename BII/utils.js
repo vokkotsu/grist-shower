@@ -1,33 +1,19 @@
 // utils.js
-// Berisi fungsi-fungsi bantuan (pembantu komputasi murni tanpa menyentuh State atau API)
-const Utils = {
-    // Referensi untuk mengurutkan bulan dari teks bahasa Inggris
-    monthOrder: {
-        "JANUARY": 1, "FEBRUARY": 2, "MARCH": 3, "APRIL": 4, "MAY": 5, "JUNE": 6,
-        "JULY": 7, "AUGUST": 8, "SEPTEMBER": 9, "OCTOBER": 10, "NOVEMBER": 11, "DECEMBER": 12
-    },
-
-    // Mengubah string "JUNE'24" menjadi angka yang bisa disorting (2406)
-    parseDateToNumber(dStr) {
-        if (!dStr) return 0;
-        let str = String(dStr).trim().toUpperCase();
-        let parts = str.split("'");
-        if (parts.length === 2) {
-            let m = this.monthOrder[parts[0]] || 0;
-            let y = parseInt(parts[1], 10);
-            return (y * 100) + m;
+const ValUtil = {
+    // Mengekstrak nilai teks murni dari Grist (mendukung tipe Choice biasa maupun Choice List)
+    getChoiceVal(val) {
+        if (Array.isArray(val)) {
+            if (val[0] === 'L') return val.slice(1).join(', ');
+            if (val.length > 1) return String(val[1]);
         }
-        return 9999;
-    },
+        return val ? String(val) : '';
+    }
+};
 
-    // Melakukan pengurutan tanggal array berdasarkan bobot numeriknya
-    sortDates(datesArray) {
-        return datesArray.sort((a, b) => this.parseDateToNumber(a) - this.parseDateToNumber(b));
-    },
-
-    // Mengubah ukuran tinggi (height) Textarea secara dinamis menyesuaikan kontennya
-    autoResizeTextarea(element) {
-        element.style.height = 'auto'; // Reset ukuran
-        element.style.height = (element.scrollHeight) + 'px'; // Atur sesuai tinggi scroll
+const DateUtil = {
+    // Mengamankan nilai tanggal (YYYY-MM-DD) yang dikirim dari HTML Date Picker
+    toGristDate(dateStr) {
+        if (!dateStr) return null;
+        return dateStr; // Grist mengenali format standar ISO YYYY-MM-DD secara native
     }
 };

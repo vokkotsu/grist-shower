@@ -1,31 +1,24 @@
 // config.js
 const Config = {
     // --- KONFIGURASI TABEL 1 (TABEL UTAMA) ---
-    tableId: 'Journey',         // Tetap menggunakan 'Journey'
-    colName: 'Nama',            // Tetap menggunakan 'Nama'
-    colCompany: 'Company_Name', // Tetap menggunakan 'Company_Name'
-    colSKU: 'SKU_Grade',        // Tetap menggunakan 'SKU_Grade'
-    colDate: 'Date',            // Tetap menggunakan 'Date'
-    colDesc: 'Deskripsi',       // Tetap menggunakan 'Deskripsi'
+    tableId: 'Journey',         // Mengikuti acuan repo BII
+    colPIC: 'Nama',             // ID Kolom untuk PIC Sales
+    colCompany: 'Company_Name', // ID Kolom untuk Customer/Klien
+    colSKU: 'SKU_Grade',        // ID Kolom untuk Produk
+    colDate: 'Date',            // ID Kolom Periode
+    colDesc: 'Deskripsi',       // ID Kolom Detail Update
 
     // --- KONFIGURASI TABEL 2 (LOG/RIWAYAT) ---
-    table2Id: 'RnD_Task_Log',       // ID Tabel Kedua
-    t2ColName: 'PIC_Terkait',       // Kolom Nama di tabel 2
-    t2ColCompany: 'Klien',          // Kolom Klien di tabel 2
-    t2ColSKU: 'Produk_Fokus',       // Kolom Produk di tabel 2
-    t2ColDate: 'Bulan_Laporan',     // Kolom Bulan di tabel 2
-    t2ColValue: 'Feedback_Klien'    // Kolom Instruksi/Feedback di tabel 2
+    table2Id: 'RnD_Task_Log',
+    t2ColName: 'PIC_Terkait',
+    t2ColCompany: 'Klien',
+    t2ColSKU: 'Produk_Fokus',
+    t2ColDate: 'Bulan_Laporan',
+    t2ColValue: 'Feedback_Klien'
 };
 
 const AppState = {
-    allRecords: [],
-    filteredRecords: [],
-    uniqueNames: [],
-    currentNameFilter: '',
-    uniqueDates: [],
-    filteredDates: [],
-    uniqueRowGroups: [],
-    unsavedEdits: {},
-    filterStartVal: null,
-    filterEndVal: null
+    picMap: new Map(),      // Relasi PIC -> Daftar "Customer — Product"
+    cpDataMap: new Map(),   // Memetakan kembali teks gabungan ke masing-masing Company & SKU asli
+    isSubmitting: false
 };
